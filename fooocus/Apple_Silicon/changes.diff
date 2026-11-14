@@ -1,0 +1,326 @@
+diff --git a/ldm_patched/modules/args_parser.py b/ldm_patched/modules/args_parser.py
+index bf87378..a548a7e 100644
+--- a/ldm_patched/modules/args_parser.py
++++ b/ldm_patched/modules/args_parser.py
+@@ -78,6 +78,14 @@ fpte_group.add_argument("--clip-in-fp32", action="store_true")
+ 
+ parser.add_argument("--directml", type=int, nargs="?", metavar="DIRECTML_DEVICE", const=-1)
+ 
++parser.add_argument("--torch-npu", action="store_true", help="Use Huawei Ascend NPU via torch_npu.")
++
++parser.add_argument("--enable-tf32", action="store_true", help="Enable TF32 on NVIDIA GPUs.")
++parser.add_argument("--cudnn-benchmark", action="store_true", help="Enable cuDNN benchmark on NVIDIA GPUs.")
++parser.add_argument("--torch-compile", action="store_true", help="Compile UNet/VAE with torch.compile (experimental).")
++
++parser.add_argument("--quantize-int4", action=argparse.BooleanOptionalAction, default=True, help="Quantize UNet Linear weights to int4 (NF4, experimental). Default on.")
++
+ parser.add_argument("--disable-ipex-hijack", action="store_true")
+ 
+ class LatentPreviewMethod(enum.Enum):
+diff --git a/ldm_patched/modules/model_management.py b/ldm_patched/modules/model_management.py
+index 840d79a..27f72d2 100644
+--- a/ldm_patched/modules/model_management.py
++++ b/ldm_patched/modules/model_management.py
+@@ -17,6 +17,7 @@ class CPUState(Enum):
+     GPU = 0
+     CPU = 1
+     MPS = 2
++    NPU = 3
+ 
+ # Determine VRAM State
+ vram_state = VRAMState.NORMAL_VRAM
+@@ -59,6 +60,21 @@ try:
+ except:
+     pass
+ 
++# Huawei Ascend NPU (torch_npu) — mimics the CUDA API.
++npu_available = False
++try:
++    import torch_npu
++    if hasattr(torch, "npu") and torch.npu.is_available():
++        npu_available = True
++except:
++    pass
++
++if getattr(args, "torch_npu", False):
++    if npu_available:
++        cpu_state = CPUState.NPU
++    else:
++        print("torch_npu not available; falling back to CPU/GPU auto-detection.")
++
+ if args.always_cpu:
+     if args.always_cpu > 0:
+         torch.set_num_threads(args.always_cpu)
+@@ -73,6 +89,11 @@ def is_intel_xpu():
+             return True
+     return False
+ 
++def is_npu():
++    global cpu_state
++    global npu_available
++    return cpu_state == CPUState.NPU and npu_available
++
+ def get_torch_device():
+     global directml_enabled
+     global cpu_state
+@@ -81,6 +102,8 @@ def get_torch_device():
+         return directml_device
+     if cpu_state == CPUState.MPS:
+         return torch.device("mps")
++    if cpu_state == CPUState.NPU:
++        return torch.device("npu")
+     if cpu_state == CPUState.CPU:
+         return torch.device("cpu")
+     else:
+@@ -97,6 +120,15 @@ def get_total_memory(dev=None, torch_total_too=False):
+     if hasattr(dev, 'type') and (dev.type == 'cpu' or dev.type == 'mps'):
+         mem_total = psutil.virtual_memory().total
+         mem_total_torch = mem_total
++    elif hasattr(dev, 'type') and dev.type == 'npu':
++        try:
++            stats = torch.npu.memory_stats(dev)
++            mem_reserved = stats['reserved_bytes.all.current']
++            mem_total = torch.npu.get_device_properties(dev).total_memory
++            mem_total_torch = mem_reserved
++        except Exception:
++            mem_total = psutil.virtual_memory().total
++            mem_total_torch = mem_total
+     else:
+         if directml_enabled:
+             mem_total = 1024 * 1024 * 1024 #TODO
+@@ -106,6 +138,15 @@ def get_total_memory(dev=None, torch_total_too=False):
+             mem_reserved = stats['reserved_bytes.all.current']
+             mem_total = torch.xpu.get_device_properties(dev).total_memory
+             mem_total_torch = mem_reserved
++        elif is_npu():
++            try:
++                stats = torch.npu.memory_stats(dev)
++                mem_reserved = stats['reserved_bytes.all.current']
++                mem_total = torch.npu.get_device_properties(dev).total_memory
++                mem_total_torch = mem_reserved
++            except Exception:
++                mem_total = psutil.virtual_memory().total
++                mem_total_torch = mem_total
+         else:
+             stats = torch.cuda.memory_stats(dev)
+             mem_reserved = stats['reserved_bytes.all.current']
+@@ -127,7 +168,10 @@ if not args.always_normal_vram and not args.always_cpu:
+         set_vram_to = VRAMState.LOW_VRAM
+ 
+ try:
+-    OOM_EXCEPTION = torch.cuda.OutOfMemoryError
++    if is_npu():
++        OOM_EXCEPTION = torch.npu.OutOfMemoryError
++    else:
++        OOM_EXCEPTION = torch.cuda.OutOfMemoryError
+ except:
+     OOM_EXCEPTION = Exception
+ 
+@@ -183,12 +227,18 @@ try:
+     if is_intel_xpu():
+         if args.attention_split == False and args.attention_quad == False:
+             ENABLE_PYTORCH_ATTENTION = True
++    if is_npu():
++        if args.attention_split == False and args.attention_quad == False:
++            ENABLE_PYTORCH_ATTENTION = True
+ except:
+     pass
+ 
+ if is_intel_xpu():
+     VAE_DTYPE = torch.bfloat16
+ 
++if is_npu():
++    VAE_DTYPE = torch.float16
++
+ if args.vae_in_cpu:
+     VAE_DTYPE = torch.float32
+ 
+@@ -205,6 +255,22 @@ if ENABLE_PYTORCH_ATTENTION:
+     torch.backends.cuda.enable_flash_sdp(True)
+     torch.backends.cuda.enable_mem_efficient_sdp(True)
+ 
++# Optional TF32 / cuDNN tuning (NVIDIA only).
++if is_nvidia():
++    if getattr(args, "enable_tf32", False):
++        try:
++            torch.backends.cuda.matmul.allow_tf32 = True
++            torch.backends.cudnn.allow_tf32 = True
++            print("TF32 enabled.")
++        except Exception:
++            pass
++    if getattr(args, "cudnn_benchmark", False):
++        try:
++            torch.backends.cudnn.benchmark = True
++            print("cuDNN benchmark enabled.")
++        except Exception:
++            pass
++
+ if args.always_low_vram:
+     set_vram_to = VRAMState.LOW_VRAM
+     lowvram_available = True
+@@ -253,6 +319,11 @@ def get_torch_device_name(device):
+             return "{}".format(device.type)
+     elif is_intel_xpu():
+         return "{} {}".format(device, torch.xpu.get_device_name(device))
++    elif is_npu():
++        try:
++            return "{} {}".format(device, torch.npu.get_device_name(device))
++        except Exception:
++            return "{}".format(device.type)
+     else:
+         return "CUDA {}: {}".format(device, torch.cuda.get_device_name(device))
+ 
+@@ -324,6 +395,25 @@ class LoadedModel:
+         if is_intel_xpu() and not args.disable_ipex_hijack:
+             self.real_model = torch.xpu.optimize(self.real_model.eval(), inplace=True, auto_kernel_selection=True, graph_mode=True)
+ 
++        if getattr(args, "quantize_int4", False):
++            try:
++                import sys, os
++                repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
++                if repo_root not in sys.path:
++                    sys.path.insert(0, repo_root)
++                from modules.quantization import quantize_model_int4
++                self.real_model = quantize_model_int4(self.real_model, verbose=True)
++                print("int4 (NF4) quantization applied to model.")
++            except Exception as e:
++                print("int4 quantization failed:", e)
++
++        if getattr(args, "torch_compile", False):
++            try:
++                self.real_model = torch.compile(self.real_model, mode="reduce-overhead", dynamic=True)
++                print("torch.compile applied to model.")
++            except Exception as e:
++                print("torch.compile failed:", e)
++
+         return self.real_model
+ 
+     def model_unload(self):
+@@ -668,6 +758,17 @@ def get_free_memory(dev=None, torch_free_too=False):
+             mem_reserved = stats['reserved_bytes.all.current']
+             mem_free_torch = mem_reserved - mem_active
+             mem_free_total = torch.xpu.get_device_properties(dev).total_memory - mem_allocated
++        elif is_npu():
++            try:
++                stats = torch.npu.memory_stats(dev)
++                mem_active = stats['active_bytes.all.current']
++                mem_reserved = stats['reserved_bytes.all.current']
++                mem_free_npu, _ = torch.npu.mem_get_info(dev)
++                mem_free_torch = mem_reserved - mem_active
++                mem_free_total = mem_free_npu + mem_free_torch
++            except Exception:
++                mem_free_total = psutil.virtual_memory().available
++                mem_free_torch = mem_free_total
+         else:
+             stats = torch.cuda.memory_stats(dev)
+             mem_active = stats['active_bytes.all.current']
+@@ -701,6 +802,12 @@ def is_device_mps(device):
+             return True
+     return False
+ 
++def is_device_npu(device):
++    if hasattr(device, 'type'):
++        if (device.type == 'npu'):
++            return True
++    return False
++
+ def should_use_fp16(device=None, model_params=0, prioritize_performance=True):
+     global directml_enabled
+ 
+@@ -727,6 +834,9 @@ def should_use_fp16(device=None, model_params=0, prioritize_performance=True):
+     if is_intel_xpu():
+         return True
+ 
++    if is_npu():
++        return True
++
+     if torch.cuda.is_bf16_supported():
+         return True
+ 
+@@ -765,6 +875,11 @@ def soft_empty_cache(force=False):
+         torch.mps.empty_cache()
+     elif is_intel_xpu():
+         torch.xpu.empty_cache()
++    elif is_npu():
++        try:
++            torch.npu.empty_cache()
++        except Exception:
++            pass
+     elif torch.cuda.is_available():
+         if force or is_nvidia(): #This seems to make things worse on ROCm so I only do it for cuda
+             torch.cuda.empty_cache()
+diff --git a/webui.py b/webui.py
+index b8159d8..eb3e583 100644
+--- a/webui.py
++++ b/webui.py
+@@ -150,6 +150,50 @@ title = f'Fooocus {fooocus_version.version}'
+ if isinstance(args_manager.args.preset, str):
+     title += ' ' + args_manager.args.preset
+ 
++def get_resource_meter():
++    import psutil, torch
++    try:
++        import ldm_patched.modules.model_management as mm
++        dev = mm.get_torch_device()
++        accel = str(dev)
++        # friendlier name
++        if hasattr(dev, 'type'):
++            if dev.type == 'cuda':
++                try:
++                    accel = 'GPU (CUDA: ' + torch.cuda.get_device_name(dev) + ')'
++                except Exception:
++                    accel = 'GPU (CUDA)'
++            elif dev.type == 'mps':
++                accel = 'GPU (Apple MPS/Metal)'
++            elif dev.type == 'npu':
++                accel = 'NPU (Ascend)'
++            elif dev.type == 'xpu':
++                accel = 'GPU (Intel XPU)'
++            elif dev.type == 'cpu':
++                accel = 'CPU'
++    except Exception:
++        accel = 'unknown'
++    ram = psutil.virtual_memory()
++    ram_used = ram.used / (1024**3)
++    ram_total = ram.total / (1024**3)
++    vram_str = ''
++    try:
++        import ldm_patched.modules.model_management as mm
++        dev = mm.get_torch_device()
++        if hasattr(dev, 'type') and dev.type == 'cuda':
++            free, total = torch.cuda.mem_get_info(dev)
++            vram_str = ' | VRAM: %.1f/%.1f GB' % ((total - free) / (1024**3), total / (1024**3))
++        elif hasattr(dev, 'type') and dev.type == 'npu':
++            free, total = torch.npu.mem_get_info(dev)
++            vram_str = ' | NPU: %.1f/%.1f GB' % ((total - free) / (1024**3), total / (1024**3))
++        elif hasattr(dev, 'type') and dev.type == 'xpu':
++            if hasattr(torch.xpu, 'mem_get_info'):
++                free, total = torch.xpu.mem_get_info(dev)
++                vram_str = ' | XPU: %.1f/%.1f GB' % ((total - free) / (1024**3), total / (1024**3))
++    except Exception:
++        pass
++    return '<div style="font-size:12px;padding:4px 8px;">Accelerator: <b>%s</b> | RAM: %.1f/%.1f GB%s</div>' % (accel, ram_used, ram_total, vram_str)
++
+ shared.gradio_root = gr.Blocks(title=title).queue()
+ 
+ with shared.gradio_root:
+@@ -1110,6 +1154,11 @@ with shared.gradio_root:
+                 .then(fn=style_sorter.sort_styles, inputs=style_selections, outputs=style_selections, queue=False, show_progress=False) \
+                 .then(lambda: None, _js='()=>{refresh_style_localization();}')
+ 
++    with gr.Row():
++        resource_meter = gr.HTML(value="Loading resource meter...", elem_id='resource-meter')
++
++    shared.gradio_root.load(get_resource_meter, outputs=resource_meter, every=1)
++
+ def dump_default_english_config():
+     from modules.localization import dump_english_config
+     dump_english_config(grh.all_components)
+@@ -1117,6 +1166,7 @@ def dump_default_english_config():
+ 
+ # dump_default_english_config()
+ 
++
+ shared.gradio_root.launch(
+     inbrowser=args_manager.args.in_browser,
+     server_name=args_manager.args.listen,

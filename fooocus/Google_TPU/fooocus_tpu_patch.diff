@@ -1,0 +1,1165 @@
+diff --git a/launch.py b/launch.py
+index eae5b19..8848d3f 100644
+--- a/launch.py
++++ b/launch.py
+@@ -26,6 +26,24 @@ REINSTALL_ALL = False
+ TRY_INSTALL_XFORMERS = False
+ 
+ 
++def is_tpu_backend():
++    """True when torch is running on the native PyTorch TPU backend.
++
++    The pinned requirements are CUDA-era versions (numpy 1.x, torch-free but
++    CUDA-oriented transitive deps).  Installing them on a TPU image can break
++    the pre-installed torch_tpu stack, so dependency installation is skipped
++    there.
++    """
++    try:
++        import torch
++        if hasattr(torch, "accelerator") and torch.accelerator.is_available():
++            accelerator = torch.accelerator.current_accelerator()
++            return accelerator is not None and accelerator.type == "tpu"
++    except Exception:
++        pass
++    return False
++
++
+ def prepare_environment():
+     torch_index_url = os.environ.get('TORCH_INDEX_URL', "https://download.pytorch.org/whl/cu121")
+     torch_command = os.environ.get('TORCH_COMMAND',
+@@ -54,7 +72,13 @@ def prepare_environment():
+                 run_pip(f"install -U -I --no-deps {xformers_package}", "xformers")
+ 
+     if REINSTALL_ALL or not requirements_met(requirements_file):
+-        run_pip(f"install -r \"{requirements_file}\"", "requirements")
++        if is_tpu_backend():
++            print("[TPU] Skipping automatic dependency installation: the pinned")
++            print("[TPU] requirements target CUDA-era packages and can break the")
++            print("[TPU] pre-installed torch_tpu/torch stack. Install what you need")
++            print("[TPU] manually (see the porting write-up for the dependency list) or set REQS_FILE to a TPU-safe file.")
++        else:
++            run_pip(f"install -r \"{requirements_file}\"", "requirements")
+ 
+     return
+ 
+@@ -149,4 +173,64 @@ config.default_base_model_name, config.checkpoint_downloads = download_models(
+ config.update_files()
+ init_cache(config.model_filenames, config.paths_checkpoints, config.lora_filenames, config.paths_loras)
+ 
++
++def configure_numpy_compat():
++    """Restore NumPy 1.x aliases still referenced by Gradio 3.41.
++
++    The TPU image ships NumPy 2.x (``requirements_versions.txt``'s numpy 1.x
++    pin is intentionally skipped), but Gradio 3.41's image encoder indexes
++    ``np.bool8``/``np.float_`` inside ``processing_utils._convert``.  Without
++    these aliases every numpy preview/output raises AttributeError.
++    """
++    import numpy as np
++
++    aliases = {"bool8": np.bool_, "float_": np.float64}
++    added = []
++    for name, value in aliases.items():
++        if not hasattr(np, name):
++            setattr(np, name, value)
++            added.append(name)
++    if not hasattr(np, "obj2sctype"):
++        np.obj2sctype = lambda obj: np.dtype(obj).type
++        added.append("obj2sctype")
++    if added:
++        print(f"[TPU] Added NumPy 1.x aliases required by Gradio 3.41: {', '.join(added)}.")
++
++
++def configure_gradio_for_slow_backends():
++    """Keep Gradio's internal queue requests alive across slow generator yields.
++
++    Gradio 3.41's queue worker calls its own ``/api/predict`` endpoint through
++    an internal ``httpx.AsyncClient`` created in ``Queue.start()``, which
++    inherits httpx's default 5 second read timeout.  A generator endpoint
++    (Fooocus' Generate chain) only answers once the next yield is ready; on TPU
++    the first diffusion step triggers lazy kernel compilation and can take tens
++    of seconds, so the queue client times out and closes the browser websocket
++    mid-generation.  Disabling the timeout keeps progress/results streaming.
++    """
++    try:
++        import httpx
++        from gradio.queueing import Queue
++
++        if getattr(Queue.start, "_tpu_timeout_patched", False):
++            return
++
++        original_start = Queue.start
++
++        async def start_without_timeout(self, ssl_verify=True):
++            await original_start(self, ssl_verify=ssl_verify)
++            if self.queue_client is not None:
++                self.queue_client.timeout = httpx.Timeout(None)
++
++        start_without_timeout._tpu_timeout_patched = True
++        Queue.start = start_without_timeout
++        print('[TPU] Gradio queue HTTP timeout disabled for slow TPU first steps.')
++    except Exception as exc:
++        print(f'[TPU] Could not extend the Gradio queue timeout: {exc}')
++
++
++if is_tpu_backend():
++    configure_numpy_compat()
++    configure_gradio_for_slow_backends()
++
+ from webui import *
+diff --git a/ldm_patched/k_diffusion/utils.py b/ldm_patched/k_diffusion/utils.py
+index a644df2..821998b 100644
+--- a/ldm_patched/k_diffusion/utils.py
++++ b/ldm_patched/k_diffusion/utils.py
+@@ -298,16 +298,19 @@ class CSVLogger:
+ @contextmanager
+ def tf32_mode(cudnn=None, matmul=None):
+     """A context manager that sets whether TF32 is allowed on cuDNN or matmul."""
+-    cudnn_old = torch.backends.cudnn.allow_tf32
+-    matmul_old = torch.backends.cuda.matmul.allow_tf32
++    cuda_available = torch.cuda.is_available()
++    cudnn_old = torch.backends.cudnn.allow_tf32 if cuda_available else None
++    matmul_old = torch.backends.cuda.matmul.allow_tf32 if cuda_available else None
+     try:
+-        if cudnn is not None:
+-            torch.backends.cudnn.allow_tf32 = cudnn
+-        if matmul is not None:
+-            torch.backends.cuda.matmul.allow_tf32 = matmul
++        if cuda_available:
++            if cudnn is not None:
++                torch.backends.cudnn.allow_tf32 = cudnn
++            if matmul is not None:
++                torch.backends.cuda.matmul.allow_tf32 = matmul
+         yield
+     finally:
+-        if cudnn is not None:
+-            torch.backends.cudnn.allow_tf32 = cudnn_old
+-        if matmul is not None:
+-            torch.backends.cuda.matmul.allow_tf32 = matmul_old
++        if cuda_available:
++            if cudnn is not None:
++                torch.backends.cudnn.allow_tf32 = cudnn_old
++            if matmul is not None:
++                torch.backends.cuda.matmul.allow_tf32 = matmul_old
+diff --git a/ldm_patched/ldm/modules/attention.py b/ldm_patched/ldm/modules/attention.py
+index e10a868..3877b7b 100644
+--- a/ldm_patched/ldm/modules/attention.py
++++ b/ldm_patched/ldm/modules/attention.py
+@@ -232,7 +232,7 @@ def attention_split(q, k, v, heads, mask=None):
+             for i in range(0, q.shape[1], slice_size):
+                 end = i + slice_size
+                 if _ATTN_PRECISION =="fp32":
+-                    with torch.autocast(enabled=False, device_type = 'cuda'):
++                    with torch.autocast(enabled=False, device_type=q.device.type):
+                         s1 = einsum('b i d, b j d -> b i j', q[:, i:end].float(), k.float()) * scale
+                 else:
+                     s1 = einsum('b i d, b j d -> b i j', q[:, i:end], k) * scale
+@@ -331,7 +331,10 @@ def attention_pytorch(q, k, v, heads, mask=None):
+ 
+ optimized_attention = attention_basic
+ 
+-if model_management.xformers_enabled():
++if model_management.is_tpu():
++    print("Using PyTorch SDPA cross attention for TPU")
++    optimized_attention = attention_pytorch
++elif model_management.xformers_enabled():
+     print("Using xformers cross attention")
+     optimized_attention = attention_xformers
+ elif model_management.pytorch_attention_enabled():
+diff --git a/ldm_patched/ldm/modules/sub_quadratic_attention.py b/ldm_patched/ldm/modules/sub_quadratic_attention.py
+index 9f4c23c..fcd2744 100644
+--- a/ldm_patched/ldm/modules/sub_quadratic_attention.py
++++ b/ldm_patched/ldm/modules/sub_quadratic_attention.py
+@@ -64,7 +64,7 @@ def _summarize_chunk(
+     mask,
+ ) -> AttnChunk:
+     if upcast_attention:
+-        with torch.autocast(enabled=False, device_type = 'cuda'):
++        with torch.autocast(enabled=False, device_type=query.device.type):
+             query = query.float()
+             key_t = key_t.float()
+             attn_weights = torch.baddbmm(
+@@ -145,7 +145,7 @@ def _get_attention_scores_no_kv_chunking(
+     mask,
+ ) -> Tensor:
+     if upcast_attention:
+-        with torch.autocast(enabled=False, device_type = 'cuda'):
++        with torch.autocast(enabled=False, device_type=query.device.type):
+             query = query.float()
+             key_t = key_t.float()
+             attn_scores = torch.baddbmm(
+diff --git a/ldm_patched/modules/model_management.py b/ldm_patched/modules/model_management.py
+index 840d79a..c4c2bb6 100644
+--- a/ldm_patched/modules/model_management.py
++++ b/ldm_patched/modules/model_management.py
+@@ -5,6 +5,26 @@ import ldm_patched.modules.utils
+ import torch
+ import sys
+ 
++
++def _detect_tpu():
++    """Return True when PyTorch is running on a native TPU backend.
++
++    Newer PyTorch builds (torch 2.5+) expose TPU as a PrivateUse1 device
++    through torch.accelerator.  This is deliberately conservative so that
++    CUDA/MPS/XPU/CPU behaviour is unchanged when no TPU is present.
++    """
++    try:
++        if hasattr(torch, "accelerator") and torch.accelerator.is_available():
++            accelerator = torch.accelerator.current_accelerator()
++            if accelerator is not None and accelerator.type == "tpu":
++                return True
++    except Exception:
++        return False
++    return False
++
++
++tpu_available = _detect_tpu()
++
+ class VRAMState(Enum):
+     DISABLED = 0    #No vram present: no need to move models to vram
+     NO_VRAM = 1     #Very low vram: enable all the options to save vram
+@@ -86,6 +106,8 @@ def get_torch_device():
+     else:
+         if is_intel_xpu():
+             return torch.device("xpu")
++        if tpu_available:
++            return torch.device("tpu")
+         else:
+             return torch.device(torch.cuda.current_device())
+ 
+@@ -94,7 +116,10 @@ def get_total_memory(dev=None, torch_total_too=False):
+     if dev is None:
+         dev = get_torch_device()
+ 
+-    if hasattr(dev, 'type') and (dev.type == 'cpu' or dev.type == 'mps'):
++    if hasattr(dev, 'type') and dev.type == 'tpu':
++        mem_free, mem_total = torch.accelerator.memory.get_memory_info(dev)
++        mem_total_torch = torch.accelerator.memory.memory_reserved(dev)
++    elif hasattr(dev, 'type') and (dev.type == 'cpu' or dev.type == 'mps'):
+         mem_total = psutil.virtual_memory().total
+         mem_total_torch = mem_total
+     else:
+@@ -126,10 +151,13 @@ if not args.always_normal_vram and not args.always_cpu:
+         print("Trying to enable lowvram mode because your GPU seems to have 4GB or less. If you don't want this use: --always-normal-vram")
+         set_vram_to = VRAMState.LOW_VRAM
+ 
+-try:
+-    OOM_EXCEPTION = torch.cuda.OutOfMemoryError
+-except:
+-    OOM_EXCEPTION = Exception
++if tpu_available:
++    OOM_EXCEPTION = getattr(torch, "OutOfMemoryError", Exception)
++else:
++    try:
++        OOM_EXCEPTION = torch.cuda.OutOfMemoryError
++    except:
++        OOM_EXCEPTION = Exception
+ 
+ XFORMERS_VERSION = ""
+ XFORMERS_ENABLED_VAE = True
+@@ -158,6 +186,10 @@ else:
+     except:
+         XFORMERS_IS_AVAILABLE = False
+ 
++if tpu_available:
++    # xformers has no TPU kernels; use PyTorch SDPA instead.
++    XFORMERS_IS_AVAILABLE = False
++
+ def is_nvidia():
+     global cpu_state
+     if cpu_state == CPUState.GPU:
+@@ -189,6 +221,13 @@ except:
+ if is_intel_xpu():
+     VAE_DTYPE = torch.bfloat16
+ 
++if tpu_available:
++    # TPU has excellent bfloat16 support and SDPA/flash attention requires
++    # float32 or bfloat16 (float16 is not a fast path on TPU).  The custom
++    # split/sub-quadratic kernels are CUDA-oriented, so always use SDPA.
++    ENABLE_PYTORCH_ATTENTION = True
++    VAE_DTYPE = torch.bfloat16
++
+ if args.vae_in_cpu:
+     VAE_DTYPE = torch.float32
+ 
+@@ -200,7 +239,9 @@ elif args.vae_in_fp32:
+     VAE_DTYPE = torch.float32
+ 
+ 
+-if ENABLE_PYTORCH_ATTENTION:
++if ENABLE_PYTORCH_ATTENTION and not tpu_available:
++    # These flags only control the CUDA SDPA dispatch.  The TPU backend
++    # chooses its own SDPA implementation.
+     torch.backends.cuda.enable_math_sdp(True)
+     torch.backends.cuda.enable_flash_sdp(True)
+     torch.backends.cuda.enable_mem_efficient_sdp(True)
+@@ -241,8 +282,13 @@ ALWAYS_VRAM_OFFLOAD = args.always_offload_from_vram
+ if ALWAYS_VRAM_OFFLOAD:
+     print("Always offload VRAM")
+ 
++def is_tpu():
++    return tpu_available
++
+ def get_torch_device_name(device):
+     if hasattr(device, 'type'):
++        if device.type == "tpu":
++            return "{} (PyTorch TPU backend)".format(device)
+         if device.type == "cuda":
+             try:
+                 allocator_backend = torch.cuda.get_allocator_backend()
+@@ -499,6 +545,10 @@ def unet_dtype(device=None, model_params=0):
+         return torch.float8_e4m3fn
+     if args.unet_in_fp8_e5m2:
+         return torch.float8_e5m2
++    if tpu_available:
++        # bfloat16 is the native/fast dtype on TPU.  float16 works but does
++        # not get the SDPA flash-attention fast path.
++        return torch.bfloat16
+     if should_use_fp16(device=device, model_params=model_params):
+         return torch.float16
+     return torch.float32
+@@ -508,6 +558,11 @@ def unet_manual_cast(weight_dtype, inference_device):
+     if weight_dtype == torch.float32:
+         return None
+ 
++    if tpu_available:
++        # The weights already live in the target dtype; a manual cast would
++        # add a per-op copy/cast and defeat the bfloat16 fast path.
++        return None
++
+     fp16_supported = ldm_patched.modules.model_management.should_use_fp16(inference_device, prioritize_performance=False)
+     if fp16_supported and weight_dtype == torch.float16:
+         return None
+@@ -529,6 +584,8 @@ def text_encoder_device():
+     elif vram_state == VRAMState.HIGH_VRAM or vram_state == VRAMState.NORMAL_VRAM:
+         if is_intel_xpu():
+             return torch.device("cpu")
++        if tpu_available:
++            return get_torch_device()
+         if should_use_fp16(prioritize_performance=False):
+             return get_torch_device()
+         else:
+@@ -549,6 +606,9 @@ def text_encoder_dtype(device=None):
+     if is_device_cpu(device):
+         return torch.float16
+ 
++    if tpu_available:
++        return torch.bfloat16
++
+     if should_use_fp16(device, prioritize_performance=False):
+         return torch.float16
+     else:
+@@ -594,6 +654,8 @@ def supports_dtype(device, dtype): #TODO
+ def device_supports_non_blocking(device):
+     if is_device_mps(device):
+         return False #pytorch bug? mps doesn't support non blocking
++    if hasattr(device, 'type') and device.type == 'tpu':
++        return False
+     return True
+ 
+ def cast_to_device(tensor, device, dtype, copy=False):
+@@ -601,7 +663,7 @@ def cast_to_device(tensor, device, dtype, copy=False):
+     if tensor.dtype == torch.float32 or tensor.dtype == torch.float16:
+         device_supports_cast = True
+     elif tensor.dtype == torch.bfloat16:
+-        if hasattr(device, 'type') and device.type.startswith("cuda"):
++        if hasattr(device, 'type') and (device.type.startswith("cuda") or device.type == "tpu"):
+             device_supports_cast = True
+         elif is_intel_xpu():
+             device_supports_cast = True
+@@ -625,6 +687,8 @@ def xformers_enabled():
+         return False
+     if is_intel_xpu():
+         return False
++    if tpu_available:
++        return False
+     if directml_enabled:
+         return False
+     return XFORMERS_IS_AVAILABLE
+@@ -644,6 +708,10 @@ def pytorch_attention_enabled():
+ def pytorch_attention_flash_attention():
+     global ENABLE_PYTORCH_ATTENTION
+     if ENABLE_PYTORCH_ATTENTION:
++        if tpu_available:
++            # TPU SDPA uses its own fused/flash-style attention kernel for
++            # float32/bfloat16 tensors with static shapes.
++            return True
+         #TODO: more reliable way of checking for flash attention?
+         if is_nvidia(): #pytorch flash attention only works on Nvidia
+             return True
+@@ -654,7 +722,12 @@ def get_free_memory(dev=None, torch_free_too=False):
+     if dev is None:
+         dev = get_torch_device()
+ 
+-    if hasattr(dev, 'type') and (dev.type == 'cpu' or dev.type == 'mps'):
++    if hasattr(dev, 'type') and dev.type == 'tpu':
++        mem_free_total, _ = torch.accelerator.memory.get_memory_info(dev)
++        mem_allocated = torch.accelerator.memory.memory_allocated(dev)
++        mem_reserved = torch.accelerator.memory.memory_reserved(dev)
++        mem_free_torch = max(0, mem_reserved - mem_allocated)
++    elif hasattr(dev, 'type') and (dev.type == 'cpu' or dev.type == 'mps'):
+         mem_free_total = psutil.virtual_memory().available
+         mem_free_torch = mem_free_total
+     else:
+@@ -727,6 +800,10 @@ def should_use_fp16(device=None, model_params=0, prioritize_performance=True):
+     if is_intel_xpu():
+         return True
+ 
++    if tpu_available:
++        # TPU uses bfloat16 by default (see unet_dtype/text_encoder_dtype).
++        return False
++
+     if torch.cuda.is_bf16_supported():
+         return True
+ 
+@@ -763,6 +840,8 @@ def soft_empty_cache(force=False):
+     global cpu_state
+     if cpu_state == CPUState.MPS:
+         torch.mps.empty_cache()
++    elif tpu_available:
++        torch.accelerator.memory.empty_cache()
+     elif is_intel_xpu():
+         torch.xpu.empty_cache()
+     elif torch.cuda.is_available():
+diff --git a/ldm_patched/modules/model_sampling.py b/ldm_patched/modules/model_sampling.py
+index 8971b4e..c86848c 100644
+--- a/ldm_patched/modules/model_sampling.py
++++ b/ldm_patched/modules/model_sampling.py
+@@ -57,6 +57,9 @@ class ModelSamplingDiscrete(torch.nn.Module):
+             betas = given_betas
+         else:
+             betas = make_beta_schedule(beta_schedule, timesteps, linear_start=linear_start, linear_end=linear_end, cosine_s=cosine_s)
++        # make_beta_schedule() returns a numpy array; torch.cumprod() requires a
++        # tensor on current PyTorch releases.
++        betas = torch.as_tensor(betas, dtype=torch.float64)
+         alphas = 1. - betas
+         alphas_cumprod = torch.cumprod(alphas, dim=0)
+ 
+diff --git a/modules/anisotropic.py b/modules/anisotropic.py
+index 5768222..20c46e4 100644
+--- a/modules/anisotropic.py
++++ b/modules/anisotropic.py
+@@ -129,8 +129,10 @@ def bilateral_blur(
+ def adaptive_anisotropic_filter(x, g=None):
+     if g is None:
+         g = x
+-    s, m = torch.std_mean(g, dim=(1, 2, 3), keepdim=True)
+-    s = s + 1e-5
++    # torch.std_mean(..., correction=...) is not implemented on all TPU
++    # backends. Compute mean/std with basic ops for broad compatibility.
++    m = torch.mean(g, dim=(1, 2, 3), keepdim=True)
++    s = torch.sqrt(torch.mean((g - m) ** 2, dim=(1, 2, 3), keepdim=True)) + 1e-5
+     guidance = (g - m) / s
+     y = _bilateral_blur(x, guidance,
+                         kernel_size=(13, 13),
+diff --git a/modules/core.py b/modules/core.py
+index 1c3dacb..ed185f6 100644
+--- a/modules/core.py
++++ b/modules/core.py
+@@ -237,7 +237,10 @@ def get_previewer(model):
+         del sd
+         VAE_approx_model.eval()
+ 
+-        if ldm_patched.modules.model_management.should_use_fp16():
++        if ldm_patched.modules.model_management.is_tpu():
++            VAE_approx_model.to(torch.bfloat16)
++            VAE_approx_model.current_type = torch.bfloat16
++        elif ldm_patched.modules.model_management.should_use_fp16():
+             VAE_approx_model.half()
+             VAE_approx_model.current_type = torch.float16
+         else:
+@@ -254,7 +257,8 @@ def get_previewer(model):
+             x_sample = x0.to(VAE_approx_model.current_type)
+             x_sample = VAE_approx_model(x_sample) * 127.5 + 127.5
+             x_sample = einops.rearrange(x_sample, 'b c h w -> b h w c')[0]
+-            x_sample = x_sample.cpu().numpy().clip(0, 255).astype(np.uint8)
++            # bfloat16 previews (e.g. TPU) must be cast before NumPy conversion.
++            x_sample = x_sample.float().cpu().numpy().clip(0, 255).astype(np.uint8)
+             return x_sample
+ 
+     return preview_function
+@@ -328,7 +332,7 @@ def ksampler(model, positive, negative, latent, seed=None, steps=30, cfg=7.0, sa
+ @torch.no_grad()
+ @torch.inference_mode()
+ def pytorch_to_numpy(x):
+-    return [np.clip(255. * y.cpu().numpy(), 0, 255).astype(np.uint8) for y in x]
++    return [np.clip(255. * y.float().cpu().numpy(), 0, 255).astype(np.uint8) for y in x]
+ 
+ 
+ @torch.no_grad()
+diff --git a/modules/patch.py b/modules/patch.py
+index 3c2dd8f..d700b47 100644
+--- a/modules/patch.py
++++ b/modules/patch.py
+@@ -236,6 +236,12 @@ def patched_sampling_function(model, x, timestep, uncond, cond, cond_scale, mode
+ 
+     positive_x0, negative_x0 = calc_cond_uncond_batch(model, cond, uncond, x, timestep, model_options)
+ 
++    if not torch.isfinite(positive_x0).all() or not torch.isfinite(negative_x0).all():
++        print('[TPU-DEBUG] NaN/Inf in model outputs',
++              'pos_nan', torch.isnan(positive_x0).any().item(), 'pos_inf', torch.isinf(positive_x0).any().item(),
++              'neg_nan', torch.isnan(negative_x0).any().item(), 'neg_inf', torch.isinf(negative_x0).any().item(),
++              'x', float(x.float().abs().mean()), 't', float(timestep.float().mean()))
++
+     positive_eps = x - positive_x0
+     negative_eps = x - negative_x0
+ 
+@@ -250,7 +256,10 @@ def patched_sampling_function(model, x, timestep, uncond, cond, cond_scale, mode
+     if patch_settings[pid].eps_record is not None:
+         patch_settings[pid].eps_record = (final_eps / timestep).cpu()
+ 
+-    return x - final_eps
++    result = x - final_eps
++    if not torch.isfinite(result).all():
++        print('[TPU-DEBUG] NaN/Inf in final sample', 'alpha', alpha, 'progress', patch_settings[pid].global_diffusion_progress)
++    return result
+ 
+ 
+ def round_to_64(x):
+@@ -375,7 +384,9 @@ def patched_cldm_forward(self, x, hint, timesteps, context, y=None, **kwargs):
+ 
+ def patched_unet_forward(self, x, timesteps=None, context=None, y=None, control=None, transformer_options={}, **kwargs):
+     self.current_step = 1.0 - timesteps.to(x) / 999.0
+-    patch_settings[os.getpid()].global_diffusion_progress = float(self.current_step.detach().cpu().numpy().tolist()[0])
++    patch_settings[os.getpid()].global_diffusion_progress = float(
++        self.current_step.detach().float().cpu().numpy().tolist()[0]
++    )
+ 
+     y = timed_adm(y, timesteps)
+ 
+diff --git a/modules/patch_clip.py b/modules/patch_clip.py
+index 06b7f01..039b951 100644
+--- a/modules/patch_clip.py
++++ b/modules/patch_clip.py
+@@ -21,6 +21,49 @@ import ldm_patched.modules.ops as ops
+ from modules.ops import use_patched_ops
+ from transformers import CLIPTextModel, CLIPTextConfig, modeling_utils, CLIPVisionConfig, CLIPVisionModelWithProjection
+ 
++# transformers >= 5 moved no_init_weights out of modeling_utils.
++try:
++    from transformers.initialization import no_init_weights
++except ImportError:  # transformers 4.x
++    no_init_weights = modeling_utils.no_init_weights
++
++
++class _LegacyCLIPTextModelLayout(torch.nn.Module):
++    """Wrap a Transformers>=5 CLIPTextModel under a `text_model` submodule.
++
++    Transformers 4 stored the encoder in `CLIPTextModel.text_model`, so all
++    checkpoints (and this repo's converters/LoRA key maps) use keys such as
++    `...transformer.text_model.encoder.layers.0...`. Transformers 5 flattened
++    that layout, which made every key in `load_state_dict(..., strict=False)`
++    silently miss and left the uninitialised parameters full of NaN on TPU.
++    Re-nesting restores the original parameter names.
++    """
++
++    def __init__(self, config):
++        super().__init__()
++        self.text_model = CLIPTextModel(config)
++
++    def forward(self, *args, **kwargs):
++        return self.text_model(*args, **kwargs)
++
++    def get_input_embeddings(self):
++        return self.text_model.get_input_embeddings()
++
++    def set_input_embeddings(self, value):
++        return self.text_model.set_input_embeddings(value)
++
++    def __getattr__(self, name):
++        try:
++            return super().__getattr__(name)
++        except AttributeError:
++            if name == "text_model":
++                raise
++            return getattr(self.text_model, name)
++
++
++def _clip_text_model(transformer):
++    return getattr(transformer, "text_model", transformer)
++
+ 
+ def patched_encode_token_weights(self, token_weight_pairs):
+     to_encode = list()
+@@ -79,13 +122,15 @@ def patched_SDClipModel__init__(self, max_length=77, freeze=True, layer="last",
+     self.num_layers = config.num_hidden_layers
+ 
+     with use_patched_ops(ops.manual_cast):
+-        with modeling_utils.no_init_weights():
+-            self.transformer = CLIPTextModel(config)
++        with no_init_weights():
++            self.transformer = _LegacyCLIPTextModelLayout(config)
+ 
+     if dtype is not None:
+         self.transformer.to(dtype)
+ 
+-    self.transformer.text_model.embeddings.to(torch.float32)
++    # Keep the embedding tables in float32 (matches upstream Fooocus) so the
++    # text encoder does not accumulate bf16 rounding errors.
++    _clip_text_model(self.transformer).embeddings.to(torch.float32)
+ 
+     if freeze:
+         self.freeze()
+@@ -133,7 +178,7 @@ def patched_SDClipModel_forward(self, tokens):
+     else:
+         z = outputs.hidden_states[self.layer_idx]
+         if self.layer_norm_hidden_state:
+-            z = self.transformer.text_model.final_layer_norm(z)
++            z = _clip_text_model(self.transformer).final_layer_norm(z)
+ 
+     if hasattr(outputs, "pooler_output"):
+         pooled_output = outputs.pooler_output.float()
+@@ -152,13 +197,15 @@ def patched_ClipVisionModel__init__(self, json_config):
+     self.load_device = ldm_patched.modules.model_management.text_encoder_device()
+     self.offload_device = ldm_patched.modules.model_management.text_encoder_offload_device()
+ 
+-    if ldm_patched.modules.model_management.should_use_fp16(self.load_device, prioritize_performance=False):
++    if ldm_patched.modules.model_management.is_tpu():
++        self.dtype = torch.bfloat16
++    elif ldm_patched.modules.model_management.should_use_fp16(self.load_device, prioritize_performance=False):
+         self.dtype = torch.float16
+     else:
+         self.dtype = torch.float32
+ 
+     with use_patched_ops(ops.manual_cast):
+-        with modeling_utils.no_init_weights():
++        with no_init_weights():
+             self.model = CLIPVisionModelWithProjection(config)
+ 
+     self.model.to(self.dtype)
+diff --git a/tpu_debug_nan.py b/tpu_debug_nan.py
+new file mode 100644
+index 0000000..77f15b0
+--- /dev/null
++++ b/tpu_debug_nan.py
+@@ -0,0 +1,150 @@
++"""Headless reproduction of the Fooocus UI generation path on TPU.
++
++Mirrors default_pipeline/async_worker defaults (styles, expansion, LoRA.
++sampler, ADM scaling) and checks every conditioning tensor + UNet output for
++NaN/Inf so we can localise the black-image bug.
++
++Run:  python tpu_debug_nan.py
++      NO_LORA=1 python tpu_debug_nan.py
++"""
++import os
++
++import torch
++
++NO_LORA = os.environ.get('NO_LORA') == '1'
++
++
++def finite(name, t):
++    if not torch.is_tensor(t):
++        print(f"{name}: <not a tensor> {type(t)}")
++        return True
++    ok = torch.isfinite(t).all().item()
++    tf = t.float()
++    print(f"{name}: shape={tuple(t.shape)} dtype={t.dtype} device={t.device} "
++          f"finite={ok} min={tf.min().item():.4g} max={tf.max().item():.4g} "
++          f"nan={torch.isnan(t).sum().item()} inf={torch.isinf(t).sum().item()}")
++    return ok
++
++
++def main():
++    # The UI installs Fooocus's sampling patches before the model is created
++    # (async_worker does `from modules.patch import patch_all; patch_all()`).
++    import modules.patch as patch
++    patch.patch_all()
++
++    if os.environ.get('NO_ANISO') == '1':
++        import modules.anisotropic as anisotropic
++        anisotropic.adaptive_anisotropic_filter = lambda x, g=None: x
++        print("[debug] anisotropic filter DISABLED")
++
++    import modules.default_pipeline as pipeline
++    import modules.sdxl_styles as styles
++    import modules.config as config
++    import modules.core as core
++    import ldm_patched.modules.model_management as mm
++
++    print("\n=== TPU / model management ===")
++    print("is_tpu:", mm.is_tpu(), "device:", mm.get_torch_device())
++    for name in ("final_unet", "final_clip", "final_vae"):
++        obj = getattr(pipeline, name, None)
++        try:
++            dt = obj.model_dtype()
++        except Exception:
++            dt = getattr(obj, "dtype", None)
++        print(f"{name} dtype:", dt, "|", type(obj).__name__ if obj is not None else None)
++    print("attention:", __import__('ldm_patched.ldm.modules.attention', fromlist=['optimized_attention']).optimized_attention)
++
++    if NO_LORA:
++        print("\n=== reloading model WITHOUT LoRA ===")
++        pipeline.refresh_everything(
++            refiner_model_name=config.default_refiner_model_name,
++            base_model_name=config.default_base_model_name,
++            loras=[],
++            vae_name=config.default_vae,
++        )
++
++    width, height = 1152, 896
++    seed = 12345
++    prompt = "a photo of a beautiful landscape, mountains, lake, dramatic sky"
++    style_selections = ["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp"]
++
++    print("\n=== building prompt exactly like async_worker.process_prompt ===")
++    use_expansion = styles.fooocus_expansion in style_selections
++    task_styles = [s for s in style_selections if s != styles.fooocus_expansion]
++    pos_work, neg_work = [], []
++    placeholder_replaced = False
++    for s in task_styles:
++        p, n, has_placeholder = styles.apply_style(s, positive=prompt)
++        placeholder_replaced = placeholder_replaced or has_placeholder
++        pos_work += p
++        neg_work += n
++    if not placeholder_replaced:
++        pos_work = [prompt] + pos_work
++    neg_work = [""] + neg_work
++
++    expansion = pipeline.final_expansion(prompt, seed) if use_expansion else ""
++    print("expansion:", expansion[:160])
++    pos_texts = pos_work + ([expansion] if use_expansion else [])
++    neg_texts = neg_work
++    print("positive texts:", pos_texts)
++    print("negative texts:", neg_texts)
++
++    pipeline.set_clip_skip(1)
++    c = pipeline.clip_encode(texts=pos_texts, pool_top_k=len(pos_work))
++    uc = pipeline.clip_encode(texts=neg_texts, pool_top_k=len(neg_texts))
++
++    print("\n=== conditioning tensors ===")
++    c_ok = True
++    for label, cond in (("positive", c), ("negative", uc)):
++        for cc, pp in cond:
++            c_ok &= finite(f"{label}.c_crossattn", cc)
++            c_ok &= finite(f"{label}.pooled_output", pp["pooled_output"])
++    print("conditioning finite:", c_ok)
++
++    print("\n=== patched ADM embedding (y) ===")
++    ps = patch.PatchSettings(sharpness=2.0, adaptive_cfg=4.0, adm_scaler_end=0.3,
++                             positive_adm_scale=1.5, negative_adm_scale=0.8,
++                             controlnet_softness=0.25)
++    patch.patch_settings[os.getpid()] = ps
++    for label, cond in (("positive", c), ("negative", uc)):
++        pooled = cond[0][1]["pooled_output"]
++        try:
++            y = pipeline.final_unet.model.encode_adm(
++                pooled_output=pooled, width=width, height=height,
++                prompt_type=label, device=mm.get_torch_device())
++            finite(f"{label}.adm_y", y)
++        except Exception as e:
++            print(f"{label}.adm_y FAILED: {type(e).__name__}: {e}")
++
++    steps = int(os.environ.get('STEPS', '30'))
++    print(f"\n=== {steps}-step sampling (dpmpp_2m_sde_gpu / karras, cfg 4, sharpness 2) ===")
++    latent = core.generate_empty_latent(width=width, height=height, batch_size=1)
++    # process_diffusion initialises the Brownian tree before sampling; the SDE
++    # sampler needs it.
++    from ldm_patched.modules.samplers import calculate_sigmas_scheduler
++    sig = calculate_sigmas_scheduler(pipeline.final_unet.model, "karras", steps)
++    sig_pos = sig[sig > 0]
++    patch.BrownianTreeNoiseSamplerPatched.global_init(
++        latent["samples"].to(mm.get_torch_device()),
++        float(sig_pos.min().cpu()), float(sig.max().cpu()), seed=seed, cpu=False)
++
++    out = core.ksampler(
++        model=pipeline.final_unet,
++        positive=c,
++        negative=uc,
++        latent=latent,
++        seed=seed,
++        steps=steps,
++        cfg=4.0,
++        sampler_name="dpmpp_2m_sde_gpu",
++        scheduler="karras",
++        disable_preview=True,
++    )
++    ok = finite("sampled_latent", out["samples"])
++    print("\nRESULT: sampled latent finite =", ok,
++          "| conditioning finite =", c_ok,
++          "| NO_LORA =", NO_LORA)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/tpu_full_generate.py b/tpu_full_generate.py
+new file mode 100644
+index 0000000..2328862
+--- /dev/null
++++ b/tpu_full_generate.py
+@@ -0,0 +1,102 @@
++"""Full Fooocus generation through the real default_pipeline path, saved to PNG.
++
++Run:  python tpu_full_generate.py
++      STEPS=8 WIDTH=1152 HEIGHT=896 python tpu_full_generate.py
++
++Prints wall-clock timings and peak TPU HBM usage.
++"""
++import os
++import time
++
++import torch
++
++import modules.patch as patch
++
++patch.patch_all()
++
++import numpy as np
++from PIL import Image
++
++import modules.default_pipeline as pipeline
++import modules.sdxl_styles as styles
++import modules.core as core
++
++width = int(os.environ.get("WIDTH", "1024"))
++height = int(os.environ.get("HEIGHT", "1024"))
++steps = int(os.environ.get("STEPS", "30"))
++seed = int(os.environ.get("SEED", "12345"))
++prompt = "a photo of a beautiful landscape, mountains, lake, dramatic sky"
++style_selections = ["Fooocus V2", "Fooocus Enhance", "Fooocus Sharp"]
++
++
++def build_cond(texts, pool_top_k):
++    pipeline.set_clip_skip(1)
++    return pipeline.clip_encode(texts=texts, pool_top_k=pool_top_k)
++
++
++def report_memory(label):
++    try:
++        dev = torch.accelerator.current_accelerator()
++        mem = torch.accelerator.memory
++        peak = mem.max_memory_allocated(dev)
++        total = mem.get_memory_info(dev)[1]
++        print(f"[mem] {label}: peak_alloc={peak / 2**20:.0f} MiB "
++              f"of {total / 2**20:.0f} MiB device memory", flush=True)
++    except Exception as exc:
++        print(f"[mem] {label}: unavailable ({exc})", flush=True)
++
++
++# --- prompt assembly, mirroring async_worker.process_prompt -------------------
++use_expansion = styles.fooocus_expansion in style_selections
++pos_work, neg_work = [], []
++placeholder_replaced = False
++for s in [x for x in style_selections if x != styles.fooocus_expansion]:
++    p, n, has_placeholder = styles.apply_style(s, positive=prompt)
++    placeholder_replaced = placeholder_replaced or has_placeholder
++    pos_work += p
++    neg_work += n
++if not placeholder_replaced:
++    pos_work = [prompt] + pos_work
++neg_work = [""] + neg_work
++
++expansion = pipeline.final_expansion(prompt, seed) if use_expansion else ""
++pos_texts = pos_work + ([expansion] if use_expansion else [])
++neg_texts = neg_work
++
++t0 = time.perf_counter()
++c = build_cond(pos_texts, pool_top_k=len(pos_work))
++uc = build_cond(neg_texts, pool_top_k=len(neg_texts))
++print(f"[time] text encoding: {time.perf_counter() - t0:.1f}s", flush=True)
++
++for label, cond in (("positive", c), ("negative", uc)):
++    for cc, pp in cond:
++        assert torch.isfinite(cc).all(), f"{label} c_crossattn is not finite"
++        assert torch.isfinite(pp["pooled_output"]).all(), f"{label} pooled_output is not finite"
++
++ps = patch.PatchSettings(sharpness=2.0, adaptive_cfg=4.0, adm_scaler_end=0.3,
++                         positive_adm_scale=1.5, negative_adm_scale=0.8,
++                         controlnet_softness=0.25)
++patch.patch_settings[os.getpid()] = ps
++
++print(f"\n=== process_diffusion {width}x{height}, {steps} steps ===", flush=True)
++t0 = time.perf_counter()
++images = pipeline.process_diffusion(
++    positive_cond=c, negative_cond=uc, steps=steps, switch=0.5,
++    width=width, height=height, image_seed=seed, callback=None,
++    sampler_name="dpmpp_2m_sde_gpu", scheduler_name="karras",
++    cfg_scale=4.0, disable_preview=True)
++print(f"[time] process_diffusion: {time.perf_counter() - t0:.1f}s", flush=True)
++report_memory("after sampling")
++
++img = images[0] if isinstance(images, (list, tuple)) else images
++img = img.float().cpu().numpy() if torch.is_tensor(img) else np.asarray(img)
++if img.dtype != np.uint8:
++    img = (np.clip(img, 0.0, 1.0) * 255.0).round().astype(np.uint8)
++if img.ndim == 4:
++    img = img[0]
++print("image:", img.shape, img.dtype, "min:", int(img.min()), "max:", int(img.max()),
++      "mean:", round(float(img.mean()), 2), flush=True)
++
++out_path = os.environ.get("OUT", "/content/fooocus_tpu_output.png")
++Image.fromarray(img).save(out_path)
++print("saved", out_path, flush=True)
+diff --git a/tpu_ui_driver.py b/tpu_ui_driver.py
+new file mode 100644
+index 0000000..158056b
+--- /dev/null
++++ b/tpu_ui_driver.py
+@@ -0,0 +1,265 @@
++"""Drive the Fooocus Gradio UI the same way a browser does.
++
++Gradio 3.41 exposes the generation chain over the websocket queue protocol:
++``/queue/join`` for both the ``get_task`` (fn_index 67) and ``generate_clicked``
++(fn_index 68) dependencies.  State components (``currentTask``,
++``state_is_generating``) live server side in ``app.state_holder[session_hash]``,
++so the second call only needs an empty ``data`` list.
++
++Usage::
++
++    python tpu_ui_driver.py --url http://127.0.0.1:7860 \
++        --prompt "a red apple on a wooden table, studio photo" \
++        --steps 8 --outdir outputs/ui_driver
++
++The script prints every queue message it receives and writes the returned
++gallery images to ``--outdir``.
++"""
++
++from __future__ import annotations
++
++import argparse
++import asyncio
++import json
++import os
++import pathlib
++import sys
++import time
++import urllib.request
++import uuid
++
++import websockets
++
++# Components that never carry a browser-serializable default value.
++_EMPTY_TYPES = {"image", "video", "audio", "file", "model3d", "dataframe", "dataset"}
++
++
++def fetch_config(url: str) -> dict:
++    with urllib.request.urlopen(url.rstrip("/") + "/config", timeout=60) as resp:
++        return json.load(resp)
++
++
++def default_value(component: dict):
++    props = component.get("props", {})
++    ctype = component["type"]
++    value = props.get("value")
++    if ctype in _EMPTY_TYPES:
++        return None
++    if value is not None:
++        return value
++    if ctype == "textbox":
++        return ""
++    if ctype == "number":
++        return 0
++    if ctype == "slider":
++        return props.get("minimum", 0)
++    if ctype == "checkbox":
++        return False
++    if ctype == "checkboxgroup":
++        return []
++    if ctype in ("dropdown", "radio"):
++        choices = props.get("choices") or []
++        return choices[0] if choices else None
++    if ctype == "colorpicker":
++        return "#000000"
++    return None
++
++
++def build_payload(config: dict, fn_index: int) -> list:
++    components = {c["id"]: c for c in config["components"]}
++    inputs = config["dependencies"][fn_index]["inputs"]
++    payload = []
++    for cid in inputs:
++        component = components[cid]
++        if component["type"] == "state":
++            # Gradio keeps state server-side (keyed by session_hash) but the
++            # browser still sends a placeholder slot for every state input.
++            payload.append(None)
++            continue
++        payload.append(default_value(component))
++    return payload
++
++
++async def run_endpoint(ws_url: str, session_hash: str, fn_index: int, data: list,
++                       timeout: float = 1800.0) -> dict:
++    """Run one queued endpoint and return the final ``process_completed`` message."""
++    deadline = time.monotonic() + timeout
++    async with websockets.connect(ws_url, max_size=None, open_timeout=60) as ws:
++        await ws.recv()  # {"msg": "send_hash"}
++        await ws.send(json.dumps({"fn_index": fn_index, "session_hash": session_hash}))
++
++        data_sent = False
++        while True:
++            remaining = deadline - time.monotonic()
++            if remaining <= 0:
++                raise TimeoutError(f"fn_index={fn_index} produced no result")
++            message = json.loads(await asyncio.wait_for(ws.recv(), timeout=remaining))
++            msg = message.get("msg")
++            if msg in ("estimation", "queue_full"):
++                print(f"[fn {fn_index}] {msg}: {message}", flush=True)
++            elif msg == "send_data":
++                if data_sent:
++                    raise RuntimeError(f"fn_index={fn_index} asked for data twice")
++                await ws.send(json.dumps({
++                    "data": data,
++                    "fn_index": fn_index,
++                    "session_hash": session_hash,
++                }))
++                data_sent = True
++                print(f"[fn {fn_index}] sent {len(data)} inputs", flush=True)
++            elif msg == "process_starts":
++                print(f"[fn {fn_index}] process_starts", flush=True)
++            elif msg == "process_generating":
++                print(f"[fn {fn_index}] process_generating", flush=True)
++            elif msg == "process_completed":
++                output = message.get("output", {})
++                print(f"[fn {fn_index}] process_completed success={message.get('success')} "
++                      f"duration={output.get('duration')}", flush=True)
++                if output.get("error"):
++                    print(f"[fn {fn_index}] server error: {output['error']}", file=sys.stderr)
++                return message
++            else:
++                print(f"[fn {fn_index}] {message}", flush=True)
++
++
++def unwrap_gallery(output) -> list[str]:
++    """Extract saved image paths from a Gallery output."""
++    if isinstance(output, dict):
++        output = output.get("value") or output.get("data") or []
++    paths = []
++    if not isinstance(output, list):
++        return paths
++    for item in output:
++        candidate = item
++        if isinstance(candidate, (list, tuple)) and candidate:
++            candidate = candidate[0]
++        if isinstance(candidate, dict):
++            candidate = candidate.get("name") or candidate.get("data")
++        if isinstance(candidate, str) and candidate:
++            paths.append(candidate)
++    return paths
++
++
++def copy_outputs(paths: list[str], outdir: str) -> list[str]:
++    out = pathlib.Path(outdir)
++    out.mkdir(parents=True, exist_ok=True)
++    saved = []
++    for path in paths:
++        try:
++            if path.startswith("file="):
++                path = path[len("file="):]
++            if os.path.exists(path):
++                dest = out / os.path.basename(path)
++                with open(path, "rb") as src, open(dest, "wb") as dst:
++                    dst.write(src.read())
++                saved.append(str(dest))
++        except OSError as exc:
++            print(f"could not copy {path}: {exc}", file=sys.stderr)
++    return saved
++
++
++async def main_async(args) -> int:
++    config = fetch_config(args.url)
++    ws_url = args.url.rstrip("/").replace("http://", "ws://").replace(
++        "https://", "wss://") + "/queue/join"
++    session_hash = uuid.uuid4().hex[:10]
++
++    get_task_index = args.get_task_fn
++    generate_index = args.generate_fn
++
++    data = build_payload(config, get_task_index)
++    print(f"session_hash={session_hash} get_task fn={get_task_index} values={len(data)}")
++
++    components = {c["id"]: c for c in config["components"]}
++    overrides = {
++        "prompt": args.prompt,
++        "negative_prompt": args.negative_prompt,
++        "steps": args.steps,
++        "image_number": args.image_number,
++        "seed": args.seed,
++    }
++    label_to_id = {}
++    for cid in config["dependencies"][get_task_index]["inputs"]:
++        component = components[cid]
++        props = component.get("props", {})
++        label_to_id.setdefault(str(props.get("label") or props.get("elem_id") or ""), cid)
++
++    def override(label, value):
++        if value is None:
++            return
++        cid = label_to_id.get(label)
++        if cid is None:
++            print(f"warning: no input labelled {label!r}", file=sys.stderr)
++            return
++        index = 0
++        for input_id in config["dependencies"][get_task_index]["inputs"]:
++            if input_id == cid:
++                data[index] = value
++                print(f"override {label!r} (id {cid}) -> {value!r}")
++                break
++            index += 1
++
++    override("positive_prompt", overrides["prompt"])
++    override("Negative Prompt", overrides["negative_prompt"])
++    override("Forced Overwrite of Sampling Step", overrides["steps"])
++    override("Image Number", overrides["image_number"])
++    override("Seed", overrides["seed"])
++
++    started = time.time()
++    first = await run_endpoint(ws_url, session_hash, get_task_index, data)
++    if not first.get("success", False):
++        print("get_task failed", file=sys.stderr)
++        return 1
++    task_output = first.get("output", {}).get("data")
++    print(f"get_task returned state {type(task_output).__name__}")
++
++    second = await run_endpoint(ws_url, session_hash, generate_index,
++                                build_payload(config, generate_index))
++    elapsed = time.time() - started
++    if not second.get("success", False):
++        print("generate_clicked failed", file=sys.stderr)
++        return 1
++
++    outputs = second.get("output", {}).get("data") or []
++    print(f"generate_clicked returned {len(outputs)} outputs in {elapsed:.1f}s")
++    gallery = unwrap_gallery(outputs[-1]) if outputs else []
++    if not gallery:
++        print("no gallery images in output; raw output:")
++        print(json.dumps(outputs, indent=2)[:4000])
++        return 1
++
++    saved = copy_outputs(gallery, args.outdir)
++    print("saved:", *saved, sep="\n  ")
++    try:
++        from PIL import Image
++        import numpy as np
++        for path in saved:
++            array = np.asarray(Image.open(path).convert("RGB"), dtype=np.float32)
++            print(f"{path}: size={array.shape[1]}x{array.shape[0]} "
++                  f"mean={array.mean():.1f} std={array.std():.1f}")
++            if float(array.std()) < 1.0:
++                print(f"ERROR: {path} is flat", file=sys.stderr)
++                return 1
++    except ImportError:
++        pass
++    return 0
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--url", default="http://127.0.0.1:7860")
++    parser.add_argument("--prompt", default="a red apple on a wooden table, studio photo")
++    parser.add_argument("--negative-prompt", default="")
++    parser.add_argument("--steps", type=int, default=8,
++                        help="value for 'Forced Overwrite of Sampling Step' (-1 keeps preset)")
++    parser.add_argument("--image-number", type=int, default=1)
++    parser.add_argument("--seed", default="12345")
++    parser.add_argument("--outdir", default="outputs/ui_driver")
++    parser.add_argument("--get-task-fn", type=int, default=67)
++    parser.add_argument("--generate-fn", type=int, default=68)
++    args = parser.parse_args()
++    return asyncio.run(main_async(args))
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

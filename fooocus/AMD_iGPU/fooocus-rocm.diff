@@ -1,0 +1,283 @@
+diff --git a/constraints-rocm.txt b/constraints-rocm.txt
+new file mode 100644
+index 0000000..e1e297a
+--- /dev/null
++++ b/constraints-rocm.txt
+@@ -0,0 +1,2 @@
++torch==2.14.1
++torchvision==0.29.1
+diff --git a/requirements-web-pins.txt b/requirements-web-pins.txt
+new file mode 100644
+index 0000000..93bfe0b
+--- /dev/null
++++ b/requirements-web-pins.txt
+@@ -0,0 +1,9 @@
++# Gradio 3.41.2 (pinned by Fooocus) is from 2023. The 2026 FastAPI/Starlette/
++# Pydantic stack breaks it with "TypeError: unhashable type: 'dict'" and a
++# failed localhost check. These pins are the known-good era.
++pydantic==1.10.13
++fastapi==0.99.1
++starlette==0.27.0
++uvicorn==0.23.2
++httpx==0.27.0
++python-multipart==0.0.6
+diff --git a/run-rocm.sh b/run-rocm.sh
+new file mode 100755
+index 0000000..05be593
+--- /dev/null
++++ b/run-rocm.sh
+@@ -0,0 +1,42 @@
++#!/usr/bin/env bash
++# Launch Fooocus on AMD Radeon 780M (gfx1103) through ROCm in WSL2.
++set -euo pipefail
++cd "$(dirname "$0")"
++
++# gfx1103 has no rocBLAS/Tensile kernels in ROCm 7.2 -> use the gfx1100 kernels.
++export HSA_OVERRIDE_GFX_VERSION="${HSA_OVERRIDE_GFX_VERSION:-11.0.0}"
++
++# Unbuffered output so the Gradio share URL appears in logs/terminals promptly.
++export PYTHONUNBUFFERED=1
++
++# rocprofiler-sdk aborts on WSL2/DXG (no /sys/class/kfd). Registration is
++# only needed for profiling, so disable it for normal inference.
++export ROCPROFILER_REGISTER_ENABLED=0
++
++# Do NOT set PYTORCH_HIP_ALLOC_CONF=expandable_segments:True here: the WSL/DXG
++# backend does not support that VMM path and allocations fail with
++# "hipErrorInvalidValue". MIOpen tuning is safe.
++export MIOPEN_FIND_MODE="${MIOPEN_FIND_MODE:-FAST}"
++export MIOPEN_USER_DB_PATH="${MIOPEN_USER_DB_PATH:-$PWD/.miopen}"
++export MIOPEN_CUSTOM_CACHE_DIR="${MIOPEN_CUSTOM_CACHE_DIR:-$PWD/.miopen}"
++mkdir -p "$MIOPEN_USER_DB_PATH" "$MIOPEN_CUSTOM_CACHE_DIR"
++export HIP_VISIBLE_DEVICES="${HIP_VISIBLE_DEVICES:-0}"
++
++if [ ! -x .venv/bin/python ]; then
++  echo "error: .venv not found. See the port README for setup." >&2
++  exit 1
++fi
++
++# Preset model download is ON by default. Pass --disable-preset-download to
++# start the UI without fetching the default SDXL checkpoint.
++# --always-low-vram is deliberate while WSL is capped at ~8 GB RAM.
++# Remove it after raising memory in C:\\Users\\<you>\\.wslconfig.
++# --share creates a public gradio.live URL (requires outbound internet access).
++exec .venv/bin/python launch.py \
++  --attention-pytorch \
++  --vae-in-fp16 \
++  --always-low-vram \
++  --disable-xformers \
++  --disable-in-browser \
++  --share \
++  "$@"
+diff --git a/setup-fooocus-amd.sh b/setup-fooocus-amd.sh
+new file mode 100755
+index 0000000..a3da728
+--- /dev/null
++++ b/setup-fooocus-amd.sh
+@@ -0,0 +1,137 @@
++#!/usr/bin/env bash
++# Clone Fooocus at a pinned tag, apply the ROCm diff, install the Python
++# environment if needed, and launch the WebUI in share mode.
++#
++# Usage:
++#   ./setup-fooocus-amd.sh [--dir DIR] [--ref REF] [--diff FILE]
++#                          [--no-install] [--no-start] [-- EXTRA_ARGS...]
++#
++# Environment overrides:
++#   FOOOCUS_REPO  git URL              (default: upstream Fooocus)
++#   FOOOCUS_REF   tag, branch or commit (default: v2.5.5)
++#   FOOOCUS_DIR   destination directory (default: ./fooocus-amd)
++#   FOOOCUS_DIFF  path to the patch     (default: next to this script)
++#   UV            path to uv            (default: uv on PATH, then ~/.local/bin/uv)
++set -euo pipefail
++
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++REPO_URL="${FOOOCUS_REPO:-https://github.com/lllyasviel/Fooocus.git}"
++REF="${FOOOCUS_REF:-v2.5.5}"
++DEST="${FOOOCUS_DIR:-$PWD/fooocus-amd}"
++DIFF="${FOOOCUS_DIFF:-$SCRIPT_DIR/fooocus-rocm.diff}"
++DO_INSTALL=1
++DO_START=1
++
++usage() {
++  cat <<'EOF'
++Clone Fooocus at a pinned tag, apply the ROCm diff, install the Python
++environment if needed, and launch the WebUI in share mode.
++
++Usage:
++  ./setup-fooocus-amd.sh [--dir DIR] [--ref REF] [--diff FILE]
++                         [--no-install] [--no-start] [-- EXTRA_ARGS...]
++
++Environment overrides:
++  FOOOCUS_REPO  git URL              (default: upstream Fooocus)
++  FOOOCUS_REF   tag, branch or commit (default: v2.5.5)
++  FOOOCUS_DIR   destination directory (default: ./fooocus-amd)
++  FOOOCUS_DIFF  path to the patch     (default: next to this script)
++  UV            path to uv            (default: uv on PATH, then ~/.local/bin/uv)
++EOF
++}
++
++while [ $# -gt 0 ]; do
++  case "$1" in
++    --dir)        DEST="${2:?--dir needs a value}"; shift 2 ;;
++    --ref)        REF="${2:?--ref needs a value}"; shift 2 ;;
++    --diff)       DIFF="${2:?--diff needs a value}"; shift 2 ;;
++    --no-install) DO_INSTALL=0; shift ;;
++    --no-start)   DO_START=0; shift ;;
++    -h|--help)    usage; exit 0 ;;
++    --)           shift; break ;;
++    *)            break ;;
++  esac
++done
++EXTRA_ARGS=("$@")
++
++die() { echo "error: $*" >&2; exit 1; }
++log() { echo "==> $*"; }
++
++command -v git >/dev/null 2>&1 || die "git is not installed"
++[ -f "$DIFF" ] || die "diff not found: $DIFF"
++
++# --- clone / checkout -------------------------------------------------------
++if [ -d "$DEST/.git" ]; then
++  log "Using existing clone at $DEST"
++  git -C "$DEST" fetch --tags --force origin || \
++    echo "warning: could not fetch; using the existing clone" >&2
++else
++  log "Cloning $REPO_URL"
++  mkdir -p "$(dirname "$DEST")"
++  git clone "$REPO_URL" "$DEST"
++fi
++
++log "Checking out $REF"
++git -C "$DEST" checkout --force "$REF"
++
++# --- apply diff -------------------------------------------------------------
++if git -C "$DEST" apply --reverse --check "$DIFF" >/dev/null 2>&1; then
++  log "Diff already applied"
++else
++  log "Applying $DIFF"
++  git -C "$DEST" apply --check "$DIFF"
++  git -C "$DEST" apply "$DIFF"
++fi
++
++chmod +x "$DEST/run-rocm.sh" "$DEST/test-rocm.sh" 2>/dev/null || true
++
++# --- Python environment -----------------------------------------------------
++if [ "$DO_INSTALL" = 1 ]; then
++  UV_BIN="${UV:-}"
++  if [ -z "$UV_BIN" ]; then
++    UV_BIN="$(command -v uv 2>/dev/null || true)"
++  fi
++  if [ -z "$UV_BIN" ] && [ -x "$HOME/.local/bin/uv" ]; then
++    UV_BIN="$HOME/.local/bin/uv"
++  fi
++  [ -n "$UV_BIN" ] || die "uv not found; install it or pass UV=/path/to/uv (see the port README)"
++
++  if [ ! -x "$DEST/.venv/bin/python" ]; then
++    log "Creating Python 3.12 venv"
++    "$UV_BIN" venv --python 3.12 "$DEST/.venv"
++  fi
++
++  PY="$DEST/.venv/bin/python"
++  log "Installing ROCm PyTorch wheels"
++  "$UV_BIN" pip install --python "$PY" \
++    --index-strategy unsafe-best-match \
++    --index-url https://download.pytorch.org/whl/rocm7.2 \
++    -r "$DEST/constraints-rocm.txt"
++
++  log "Installing Fooocus requirements"
++  "$UV_BIN" pip install --python "$PY" \
++    --index-strategy unsafe-best-match \
++    -r "$DEST/requirements_versions.txt"
++
++  log "Installing Gradio-compatible web pins"
++  "$UV_BIN" pip install --python "$PY" -r "$DEST/requirements-web-pins.txt"
++
++  # launch.py shells out to "python -m pip" when requirements look missing.
++  "$UV_BIN" pip install --python "$PY" pip
++else
++  log "Skipping Python environment setup (--no-install)"
++fi
++
++if ! command -v rocminfo >/dev/null 2>&1 && [ ! -x /opt/rocm/bin/rocminfo ]; then
++  echo "warning: rocminfo not found; install ROCm 7.2.4 first (see the port README)" >&2
++fi
++
++# --- start ------------------------------------------------------------------
++if [ "$DO_START" = 1 ]; then
++  [ -x "$DEST/.venv/bin/python" ] || die "no .venv in $DEST; rerun without --no-install"
++  log "Starting Fooocus in share mode"
++  cd "$DEST"
++  exec ./run-rocm.sh "${EXTRA_ARGS[@]}"
++else
++  log "Ready. Start with: cd \"$DEST\" && ./run-rocm.sh"
++fi
+diff --git a/test-rocm.py b/test-rocm.py
+new file mode 100644
+index 0000000..fd59a55
+--- /dev/null
++++ b/test-rocm.py
+@@ -0,0 +1,47 @@
++"""Quick self-test for PyTorch on the Radeon 780M (gfx1103) under WSL2.
++
++Run through ./test-rocm.sh so the required env vars are set.
++"""
++import time
++
++import torch
++
++print("torch:", torch.__version__)
++print("hip:", torch.version.hip, "| cuda:", torch.version.cuda)
++print("cuda available:", torch.cuda.is_available())
++if not torch.cuda.is_available():
++    raise SystemExit("PyTorch cannot see the GPU")
++
++print("device:", torch.cuda.get_device_name(0))
++print("arch list:", torch.cuda.get_arch_list())
++props = torch.cuda.get_device_properties(0)
++print(
++    f"total_memory: {props.total_memory / 1e9:.2f} GB | "
++    f"CUs: {props.multi_processor_count} | cc: {props.major}.{props.minor}"
++)
++print("bf16 supported:", torch.cuda.is_bf16_supported())
++free, total = torch.cuda.mem_get_info(0)
++print(f"mem_get_info: free {free / 1e9:.2f} GB / total {total / 1e9:.2f} GB")
++
++a = torch.randn(4096, 4096, device="cuda", dtype=torch.float16)
++b = torch.randn(4096, 4096, device="cuda", dtype=torch.float16)
++for _ in range(3):
++    c = a @ b
++torch.cuda.synchronize()
++n = 20
++t = time.time()
++for _ in range(n):
++    c = a @ b
++torch.cuda.synchronize()
++dt = (time.time() - t) / n
++print(f"fp16 4096^3 matmul: {dt * 1000:.1f} ms -> {2 * 4096**3 / dt / 1e12:.2f} TFLOPS")
++
++q = torch.randn(1, 8, 4096, 64, device="cuda", dtype=torch.float16)
++for _ in range(3):
++    torch.nn.functional.scaled_dot_product_attention(q, q, q)
++torch.cuda.synchronize()
++t = time.time()
++for _ in range(20):
++    torch.nn.functional.scaled_dot_product_attention(q, q, q)
++torch.cuda.synchronize()
++print(f"SDPA fp16 4096 tokens: {(time.time() - t) / 20 * 1000:.1f} ms")
+diff --git a/test-rocm.sh b/test-rocm.sh
+new file mode 100755
+index 0000000..db8f1f6
+--- /dev/null
++++ b/test-rocm.sh
+@@ -0,0 +1,10 @@
++#!/usr/bin/env bash
++# Verify that PyTorch + ROCm can execute on the Radeon 780M under WSL2.
++set -euo pipefail
++cd "$(dirname "$0")"
++
++export HSA_OVERRIDE_GFX_VERSION="${HSA_OVERRIDE_GFX_VERSION:-11.0.0}"
++export ROCPROFILER_REGISTER_ENABLED=0
++export HIP_VISIBLE_DEVICES="${HIP_VISIBLE_DEVICES:-0}"
++
++exec .venv/bin/python test-rocm.py

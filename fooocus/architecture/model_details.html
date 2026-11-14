@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fooocus model details · portpilot</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --faint: #94a3b8;
+    --line: #cbd5e1;
+    --hair: #e2e8f0;
+    --bg: #eef2f6;
+    --canvas: #f8fafc;
+    --panel: #ffffff;
+    --accent: #334155;
+    --accent-soft: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+  /* top bar */
+  .topbar {
+    display: flex; align-items: center; gap: 26px;
+    padding: 11px 20px; background: #fff; border-bottom: 1px solid var(--hair);
+    flex: 0 0 auto; z-index: 5;
+  }
+  .brand { min-width: 230px; }
+  .brand .back {
+    font: 600 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--muted); text-decoration: none;
+  }
+  .brand .back:hover { color: var(--ink); }
+  .brand h1 { margin: 5px 0 2px; font-size: 18px; letter-spacing: -.015em; }
+  .brand p { margin: 0; font-size: 12px; color: var(--muted); }
+  .ports { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--hair); background: #fff; color: #334155;
+    border-radius: 999px; padding: 6px 11px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+  }
+  .chip:hover { border-color: var(--line); background: #f8fafc; }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dot, #94a3b8); }
+  .chip[aria-pressed="true"] { background: var(--chip, #0f172a); border-color: var(--chip, #0f172a); color: #fff; }
+  .chip[aria-pressed="true"] .dot { background: #fff; }
+  .chip:focus-visible { outline: 2px solid #0f172a; outline-offset: 2px; }
+
+  /* main split */
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 384px; flex: 1 1 auto; min-height: 0; }
+  .canvas-wrap { position: relative; overflow: hidden; background: var(--canvas); }
+  svg#diagram { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+  svg#diagram.dragging { cursor: grabbing; }
+  svg#diagram text { user-select: none; }
+
+  /* toolbar */
+  .toolbar {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    display: flex; align-items: center; gap: 2px;
+    padding: 4px; background: rgba(255,255,255,.94); border: 1px solid var(--hair);
+    border-radius: 10px; box-shadow: 0 4px 16px rgba(15,23,42,.07); backdrop-filter: blur(6px);
+  }
+  .tool {
+    border: 0; background: none; border-radius: 7px; color: #334155;
+    min-width: 30px; height: 30px; padding: 0 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .tool:hover { background: #f1f5f9; color: var(--ink); }
+  .tool:focus-visible { outline: 2px solid #0f172a; outline-offset: 1px; }
+  .tool.wide { min-width: 46px; font-size: 11.5px; letter-spacing: .02em; }
+  .zoom-label {
+    min-width: 50px; text-align: center; font: 600 11px/1 ui-monospace, Menlo, monospace;
+    color: var(--muted); padding: 0 2px;
+  }
+  .sep { width: 1px; height: 18px; background: var(--hair); margin: 0 3px; }
+
+  /* hint + legend */
+  .hint {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 2; padding: 6px 11px; border-radius: 999px; background: rgba(255,255,255,.9);
+    border: 1px solid var(--hair); color: var(--muted); font-size: 11px; white-space: nowrap;
+    pointer-events: none;
+  }
+  .legend {
+    position: absolute; left: 12px; bottom: 12px; z-index: 2;
+    background: rgba(255,255,255,.94); border: 1px solid var(--hair); border-radius: 10px;
+    padding: 9px 11px; font-size: 10.5px; color: #475569; box-shadow: 0 4px 16px rgba(15,23,42,.06);
+  }
+  .legend .row { display: flex; align-items: center; gap: 7px; margin: 3px 0; }
+  .legend .sw { width: 18px; height: 0; border-top: 1.8px solid var(--line); }
+  .legend .sw.hot { border-color: var(--accent); border-top-style: dashed; }
+  .legend .box { width: 15px; height: 10px; border: 1.4px solid var(--line); border-radius: 2px; background: #fff; }
+  .legend .box.hot { border-color: var(--accent); border-width: 2px; }
+  .legend .box.port { border-color: var(--accent); border-style: dashed; background: var(--accent-soft); }
+
+  /* architecture notes in the overview panel */
+  details.note { margin: 10px 0 0; border: 1px solid var(--hair); border-radius: 8px; background: #fff; padding: 0; }
+  details.note > summary { cursor: pointer; padding: 8px 10px; font-size: 12px; font-weight: 650; color: #334155; list-style: none; user-select: none; }
+  details.note > summary::-webkit-details-marker { display: none; }
+  details.note > summary::before { content: '▸ '; color: var(--muted); }
+  details.note[open] > summary::before { content: '▾ '; }
+  details.note > .lede, details.note > pre, details.note > table { margin: 0 10px 10px; }
+  details.note > pre.flow { margin: 0 10px 10px; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--hair); border-radius: 6px; font: 400 10.5px/1.45 ui-monospace, Menlo, monospace; color: #334155; overflow-x: auto; white-space: pre; }
+  table.note-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 10px 10px; }
+  table.note-table th, table.note-table td { padding: 4px 6px; border-bottom: 1px solid var(--hair); text-align: left; vertical-align: top; }
+  table.note-table th { font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  table.note-table td:first-child { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; color: #334155; white-space: nowrap; }
+
+  /* panel */
+  aside#panel { background: var(--panel); border-left: 1px solid var(--hair); overflow-y: auto; min-height: 0; }
+  .panel-inner { padding: 20px 20px 40px; }
+  .eyebrow {
+    font: 700 10px/1.4 ui-monospace, Menlo, monospace; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  h2 { margin: 7px 0 6px; font-size: 20px; letter-spacing: -.02em; line-height: 1.2; }
+  h3 { margin: 22px 0 8px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .lede { margin: 8px 0 0; color: #475569; font-size: 12.8px; line-height: 1.58; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+  .facts > div { background: #f8fafc; border: 1px solid var(--hair); border-radius: 8px; padding: 8px 10px; }
+  .facts dt { font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .facts dd { margin: 3px 0 0; font-size: 11.5px; line-height: 1.35; font-weight: 600; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; justify-content: center;
+    padding: 8px 12px; border-radius: 8px; border: 1px solid var(--hair);
+    background: #fff; color: var(--ink); font-size: 12px; font-weight: 650; text-decoration: none;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--line); background: #f8fafc; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.block { width: 100%; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 0; }
+  .backbtn {
+    border: 0; background: none; color: var(--muted); font-size: 11.5px; font-weight: 600;
+    padding: 0; margin: 0 0 10px; cursor: pointer;
+  }
+  .backbtn:hover { color: var(--ink); }
+
+  .port-list { display: grid; gap: 8px; margin-top: 10px; }
+  .port-btn {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+    width: 100%; text-align: left; padding: 10px 11px; border: 1px solid var(--hair);
+    border-radius: 9px; background: #fff; cursor: pointer;
+  }
+  .port-btn:hover { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc); }
+  .port-btn .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pc); }
+  .port-btn b { display: block; font-size: 12.5px; }
+  .port-btn small { display: block; color: var(--muted); font-size: 10.8px; margin-top: 2px; }
+  .port-btn .diff { font-size: 10px; font-weight: 700; color: var(--pc); text-transform: uppercase; letter-spacing: .04em; }
+
+  .changes { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .change { display: grid; grid-template-columns: 1fr auto; border: 1px solid var(--hair); border-radius: 9px; background: #fff; overflow: hidden; }
+  .change:hover { border-color: var(--accent); }
+  .change.active { box-shadow: 0 0 0 1px var(--accent); border-color: var(--accent); }
+  .change-main {
+    display: block; width: 100%; text-align: left; border: 0; background: none;
+    padding: 9px 10px 10px; cursor: pointer; color: inherit; font: inherit;
+  }
+  .change-main:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .change-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 17px; height: 17px; border-radius: 50%; background: var(--accent);
+    color: #fff; font: 700 9.5px/1 ui-monospace, Menlo, monospace;
+  }
+  .file { font: 600 10.5px/1.3 ui-monospace, Menlo, monospace; color: #334155; }
+  .delta { margin-left: auto; font: 600 9.5px/1 ui-monospace, Menlo, monospace; color: var(--muted); }
+  .change-title { display: block; margin-top: 4px; font-size: 12px; font-weight: 650; }
+  .change-text { display: block; margin-top: 2px; font-size: 11px; line-height: 1.45; color: #64748b; }
+  .change-link {
+    display: flex; align-items: center; justify-content: center; width: 32px;
+    border-left: 1px solid var(--hair); color: var(--muted); text-decoration: none; font-size: 14px;
+  }
+  .change-link:hover { background: #f8fafc; color: var(--ink); }
+  .change-text code, .lede code, .node-what code, .node-changes code {
+    font-family: ui-monospace, Menlo, monospace; font-size: .92em;
+    background: #f1f5f9; border: 1px solid #e8eef5; border-radius: 4px; padding: 0 3px;
+  }
+
+  .node-where {
+    display: inline-block; margin: 2px 0 12px; padding: 3px 7px; border-radius: 5px;
+    background: #f1f5f9; color: #475569; font: 600 10.5px/1.4 ui-monospace, Menlo, monospace;
+  }
+  .node-what { font-size: 12.8px; line-height: 1.6; color: #334155; margin: 0 0 12px; }
+  .node-changes { display: grid; gap: 8px; }
+  .node-change { border: 1px solid var(--hair); border-left: 3px solid var(--accent); border-radius: 7px; padding: 9px 10px; }
+  .node-change b { font-size: 12px; display: block; }
+  .node-change .meta { font: 600 10px/1.5 ui-monospace, Menlo, monospace; color: var(--muted); margin: 2px 0 4px; }
+  .node-change p { margin: 0; font-size: 11.3px; line-height: 1.5; color: #475569; }
+  .empty { font-size: 12px; color: var(--muted); line-height: 1.5; border: 1px dashed var(--line); border-radius: 8px; padding: 10px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 16px);
+    background: #0f172a; color: #fff; padding: 9px 14px; border-radius: 8px;
+    font-size: 12px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* SVG diagram */
+  .node { cursor: pointer; outline: none; }
+  .node .bg {
+    fill: #fff; stroke: #cbd5e1; stroke-width: 1.4;
+    filter: drop-shadow(0 1px 1px rgba(15,23,42,.05));
+    transition: stroke .15s, fill .15s;
+  }
+  .node.side .bg { fill: #fbfcfe; }
+  .node:hover .bg { stroke: #64748b; }
+  .node.touched .bg { stroke: var(--accent); stroke-width: 2; }
+  .node.touched .bar { opacity: 1; }
+  .node.selected .bg { stroke: var(--accent); stroke-width: 3; filter: drop-shadow(0 3px 8px rgba(15,23,42,.16)); }
+  .node.portnode .bg { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .node.portnode:hover .bg, .node.portnode.selected .bg { stroke-dasharray: none; }
+  .node:focus-visible .bg { stroke: #0f172a; stroke-width: 2.4; }
+  .node .bar { opacity: 0; fill: var(--accent); }
+  .node .title { fill: #0f172a; font: 650 13px/1 ui-sans-serif, system-ui, sans-serif; }
+  .node .sub { fill: #64748b; font: 400 10.6px/1 ui-sans-serif, system-ui, sans-serif; }
+  .node .where { fill: #94a3b8; font: 500 9.4px/1 ui-monospace, Menlo, monospace; }
+  .node .badge { fill: var(--accent); }
+  .node .badge-t { fill: #fff; font: 700 9px/1 ui-monospace, Menlo, monospace; text-anchor: middle; }
+  .edge { fill: none; stroke: #cbd5e1; stroke-width: 1.5; marker-end: url(#arrow-neutral); }
+  .edge.dim { opacity: .28; }
+  .edge.hot { stroke: var(--accent); stroke-width: 2; marker-end: url(#arrow-accent); stroke-dasharray: 6 5; animation: flow 1.1s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -22; } }
+  .divider-line { stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 4 5; opacity: .55; }
+  .divider-pill { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+  .divider-text { fill: var(--accent); font: 650 10px/1 ui-monospace, Menlo, monospace; text-anchor: middle; }
+  .lane-label { fill: var(--accent); font: 650 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .edge.hot { animation: none; }
+  }
+  @media (max-width: 1050px) {
+    main { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) 46vh; }
+    aside#panel { border-left: 0; border-top: 1px solid var(--hair); }
+    .brand p { display: none; }
+    .brand { min-width: 0; }
+  }
+  @media (max-width: 700px) {
+    .topbar { gap: 10px; padding: 9px 12px; }
+    .brand h1 { font-size: 16px; }
+    .chip { padding: 5px 9px; font-size: 11px; }
+    .legend, .hint { display: none; }
+    .facts { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <a class="back" href="../../README.md">portpilot</a>
+    <h1>Fooocus model details</h1>
+    <p>Operators, shapes, dtypes, and per-port changes</p>
+  </div>
+  <nav class="ports" aria-label="Choose a port overlay">
+    <button class="chip" data-port="all" aria-pressed="true">All ports</button>
+    <button class="chip" data-port="amx" style="--dot:#2563eb;--chip:#2563eb" aria-pressed="false"><span class="dot"></span>Intel AMX</button>
+    <button class="chip" data-port="amd" style="--dot:#dc2626;--chip:#dc2626" aria-pressed="false"><span class="dot"></span>AMD iGPU</button>
+    <button class="chip" data-port="tpu" style="--dot:#d97706;--chip:#d97706" aria-pressed="false"><span class="dot"></span>Google TPU</button>
+    <button class="chip" data-port="apple" style="--dot:#059669;--chip:#059669" aria-pressed="false"><span class="dot"></span>Apple Silicon</button>
+    <button class="chip" data-port="snap" style="--dot:#7c3aed;--chip:#7c3aed" aria-pressed="false"><span class="dot"></span>Snapdragon X</button>
+  </nav>
+</header>
+
+<main>
+  <div class="canvas-wrap">
+    <div class="toolbar" role="toolbar" aria-label="Zoom and pan">
+      <button class="tool" data-act="out" aria-label="Zoom out">−</button>
+      <button class="tool zoom-label" data-act="resetzoom" aria-label="Reset zoom to 100%">100%</button>
+      <button class="tool" data-act="in" aria-label="Zoom in">+</button>
+      <span class="sep"></span>
+      <button class="tool wide" data-act="fit">Fit</button>
+      <button class="tool wide" data-act="reset">Reset</button>
+      <span class="sep"></span>
+      <button class="tool wide" data-act="copy">Copy link</button>
+    </div>
+
+    <svg id="diagram" role="img" aria-label="Fooocus architecture diagram">
+      <defs>
+        <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+          <path d="M24 0H0V24" fill="none" stroke="#e8eef4" stroke-width="1"/>
+        </pattern>
+        <pattern id="grid-lg" width="120" height="120" patternUnits="userSpaceOnUse">
+          <path d="M120 0H0V120" fill="none" stroke="#dfe7f0" stroke-width="1"/>
+        </pattern>
+        <marker id="arrow-neutral" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+        </marker>
+        <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+      <g id="world"></g>
+    </svg>
+
+    <div class="legend" aria-hidden="true">
+      <div class="row"><span class="sw"></span> model data flow</div>
+      <div class="row"><span class="sw hot"></span> selected port path</div>
+      <div class="row"><span class="box hot"></span> changed node</div>
+      <div class="row"><span class="box" style="background:linear-gradient(180deg,#2563eb 0%,#dc2626 25%,#d97706 50%,#059669 75%,#7c3aed 100%)"></span> one colour per port</div>
+      <div class="row"><span class="box port"></span> port-specific node</div>
+    </div>
+    <div class="hint">Drag to pan · scroll to zoom · click a node</div>
+  </div>
+
+  <aside id="panel" role="region" aria-label="Details"></aside>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<noscript>
+  <p style="padding:20px">This page needs JavaScript for the interactive diagram. The same architecture is written out in <a href="README.md">README.md</a>.</p>
+</noscript>
+
+<script>
+'use strict';
+
+const GH = 'https://github.com/lllyasviel/Fooocus/blob/v2.5.5/';
+const COL = [80, 410, 740, 1070];
+const TOP = 34;
+const ROW = 98;
+const NW = 270;
+const NH = 80;
+
+function mkNode(id, col, row, title, sub, where, side, src) {
+  return {
+    id, col, row,
+    x: COL[col], y: TOP + row * ROW, w: NW, h: NH,
+    title, sub, where, side: !!side, src: src || ''
+  };
+}
+
+const BASE_NODES = [
+  mkNode('clip_l', 0, 0, 'CLIP-L encoder', ['Transformer blocks', '123M params'], 'fp32 weights', false, GH + 'modules/patch_clip.py'),
+  mkNode('clip_g', 0, 1, 'CLIP-G encoder', ['Transformer blocks', '694M params'], 'fp32 weights', false, GH + 'modules/patch_clip.py'),
+  mkNode('clip_pool', 0, 2, 'Pooled output', ['1 x 1280', 'fp32'], 'pooled_output', false, GH + 'modules/patch_clip.py'),
+  mkNode('clip_tok', 0, 3, 'Tokenize + embed', ['77 tokens', 'fp32'], 'clip_encode()', false, GH + 'modules/default_pipeline.py#L182'),
+
+  mkNode('unet_in', 1, 0, 'UNet input conv', ['4 -> 320 ch', 'Conv 3x3, SiLU'], 'openaimodel.py', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('down1', 1, 1, 'Down block 1', ['320 ch, 64x64', 'ResNet + Attn'], 'input_blocks[1-2]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('down2', 1, 2, 'Down block 2', ['640 ch, 32x32', 'ResNet + Attn'], 'input_blocks[3-5]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('down3', 1, 3, 'Down block 3', ['1280 ch, 16x16', 'ResNet + Attn'], 'input_blocks[6-8]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('down4', 1, 4, 'Down block 4', ['1280 ch, 8x8', 'ResNet + Attn'], 'input_blocks[9-11]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('mid', 1, 5, 'Middle block', ['1280 ch, 8x8', 'ResNet + Attn'], 'middle_block', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('up4', 1, 6, 'Up block 4', ['1280 ch, 8x8', 'ResNet + Attn'], 'output_blocks[0-2]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('up3', 1, 7, 'Up block 3', ['1280 ch, 16x16', 'ResNet + Attn'], 'output_blocks[3-5]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('up2', 1, 8, 'Up block 2', ['640 ch, 32x32', 'ResNet + Attn'], 'output_blocks[6-8]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('up1', 1, 9, 'Up block 1', ['320 ch, 64x64', 'ResNet + Attn'], 'output_blocks[9-11]', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('unet_out', 1, 10, 'UNet output conv', ['320 -> 4 ch', 'Conv 3x3'], 'out conv', false, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+
+  mkNode('self_attn', 2, 1, 'Self-attention', ['image tokens', 'SDPA / xformers'], 'attn.py:332', true, GH + 'ldm_patched/ldm/modules/attention.py#L332'),
+  mkNode('cross_attn', 2, 2, 'Cross-attention', ['img x text (77)', 'SDPA / xformers'], 'attn.py:332', true, GH + 'ldm_patched/ldm/modules/attention.py#L332'),
+  mkNode('attn_norm', 2, 3, 'LayerNorm', ['1280 ch', 'fp32'], 'openaimodel.py', true, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('silu', 2, 4, 'SiLU activation', ['elementwise', 'fp16/bf16'], 'openaimodel.py', true, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('timestep', 2, 5, 'Timestep embed', ['1280 dim', 'MLP'], 'openaimodel.py', true, GH + 'ldm_patched/ldm/modules/diffusionmodules/openaimodel.py'),
+  mkNode('adm', 2, 6, 'ADM (pooled)', ['5632 dim', 'concat'], 'sdxl_encode_adm', true, GH + 'modules/patch.py'),
+
+  mkNode('vae_enc', 3, 0, 'VAE encoder', ['3 -> 4 latent', 'Conv, GroupNorm'], 'core.py:160', true, GH + 'modules/core.py#L160'),
+  mkNode('vae_quant', 3, 1, 'Quant conv', ['4 -> 4', 'Conv 1x1'], 'sd.py', true, GH + 'ldm_patched/modules/sd.py'),
+  mkNode('vae_dec', 3, 2, 'VAE decoder', ['4 -> 3 RGB', 'Conv (tiled)'], 'core.py:160', true, GH + 'modules/core.py#L160'),
+  mkNode('vae_norm', 3, 3, 'GroupNorm', ['VAE channels', 'fp32'], 'model_management.py', true, GH + 'ldm_patched/modules/model_management.py'),
+];
+
+const BASE_EDGES = [
+  ['clip_tok', 'clip_l'], ['clip_tok', 'clip_g'], ['clip_l', 'clip_pool'], ['clip_g', 'clip_pool'],
+  ['unet_in', 'down1'], ['down1', 'down2'], ['down2', 'down3'], ['down3', 'down4'],
+  ['down4', 'mid'], ['mid', 'up4'], ['up4', 'up3'], ['up3', 'up2'], ['up2', 'up1'], ['up1', 'unet_out'],
+  ['down1', 'self_attn'], ['down2', 'self_attn'], ['down3', 'self_attn'], ['down4', 'self_attn'],
+  ['mid', 'self_attn'], ['up4', 'self_attn'], ['up3', 'self_attn'], ['up2', 'self_attn'], ['up1', 'self_attn'],
+  ['down1', 'cross_attn'], ['down2', 'cross_attn'], ['down3', 'cross_attn'], ['down4', 'cross_attn'],
+  ['mid', 'cross_attn'], ['up4', 'cross_attn'], ['up3', 'cross_attn'], ['up2', 'cross_attn'], ['up1', 'cross_attn'],
+  ['cross_attn', 'clip_l'], ['cross_attn', 'clip_g'],
+  ['mid', 'attn_norm'], ['mid', 'silu'], ['timestep', 'mid'], ['adm', 'mid'],
+  ['clip_pool', 'adm'],
+  ['vae_enc', 'vae_quant'], ['vae_quant', 'vae_dec'], ['vae_dec', 'vae_norm']
+];
+
+const SNAP_EDGES = [];
+
+/* Port-specific nodes: only Qualcomm needs a different path. */
+function mkPortNode(id, col, row, title, sub, where) {
+  const n = mkNode(id, col, row, title, sub, where, true, '');
+  n.portnode = true;
+  return n;
+}
+
+const PORT_NODES = {};
+
+const SPINE = ['clip_l', 'clip_g', 'unet_in', 'down1', 'down2', 'down3', 'mid', 'up3', 'up2', 'up1', 'unet_out', 'vae_dec'];
+const SNAP_SPINE = SPINE;
+
+const PORTS = {
+  amx: {
+    name: 'Intel AMX', short: 'AMX', color: '#2563eb', soft: '#dbeafe',
+    status: 'Tested with Fooocus', hardware: 'GCP C4 · Xeon 6985P-C · no GPU',
+    lines: '262 (+227/−35)', difficulty: 'Medium–high',
+    summary: 'bf16 autocast around UNet, VAE, and CLIP lets oneDNN pick AMX kernels. CLIP key remap for Transformers 5.',
+    readme: '../Intel_AMX/README.md', flow: SPINE, extraEdges: [], hide: [],
+    changes: [
+      { node: 'unet_in', file: 'modules/patch.py', delta: '+38/−1', title: 'Autocast wraps', text: 'UNet forward wrapped in <code>torch.autocast(cpu, bfloat16)</code>.', href: '../Intel_AMX/README.md#files-changed' },
+      { node: 'down1', file: 'modules/patch.py', delta: '+38/−1', title: 'Autocast wraps', text: 'Down blocks run in bf16; oneDNN selects AMX kernels.', href: '../Intel_AMX/README.md#files-changed' },
+      { node: 'mid', file: 'modules/patch.py', delta: '+38/−1', title: 'Autocast wraps', text: 'Middle block in bf16.', href: '../Intel_AMX/README.md#files-changed' },
+      { node: 'up1', file: 'modules/patch.py', delta: '+38/−1', title: 'Autocast wraps', text: 'Up blocks in bf16.', href: '../Intel_AMX/README.md#files-changed' },
+      { node: 'unet_out', file: 'modules/patch.py', delta: '+38/−1', title: 'Autocast wraps', text: 'Output conv in bf16.', href: '../Intel_AMX/README.md#files-changed' },
+      { node: 'vae_dec', file: 'modules/patch.py', delta: '+38/−1', title: 'VAE autocast', text: 'VAE decode wrapped in bf16.', href: '../Intel_AMX/README.md#files-changed' },
+      { node: 'clip_l', file: 'sd.py', delta: '30 changed', title: 'CLIP key remap', text: 'Transformers 5 flattened <code>text_model</code>; remap <code>transformer.text_model.*</code> to <code>transformer.*</code>.', href: '../Intel_AMX/README.md#bugs-encountered--resolutions' },
+      { node: 'clip_g', file: 'sd.py', delta: '30 changed', title: 'CLIP key remap', text: 'Same remap for CLIP-G.', href: '../Intel_AMX/README.md#bugs-encountered--resolutions' },
+      { node: 'self_attn', file: 'model_management.py', delta: '+16', title: 'SDPA on CPU', text: 'PyTorch attention enabled on CPU.', href: '../Intel_AMX/README.md#files-changed' },
+      { node: 'cross_attn', file: 'model_management.py', delta: '+16', title: 'SDPA on CPU', text: 'Cross-attention via SDPA.', href: '../Intel_AMX/README.md#files-changed' }
+    ]
+  },
+  amd: {
+    name: 'AMD Radeon 780M', short: 'AMD', color: '#dc2626', soft: '#fee2e2',
+    status: 'UI verified; no image benchmarked', hardware: 'Ryzen 7 7840HS · Radeon 780M · WSL2',
+    lines: '247 (+247/−0)', difficulty: 'Medium',
+    summary: 'No source change: ROCm sees cuda:0; fp16 VAE, SDPA + AOTriton, low-VRAM offload.',
+    readme: '../AMD_iGPU/README.md', flow: SPINE, extraEdges: [], hide: [],
+    changes: [
+      { node: 'vae_dec', file: '--vae-in-fp16', delta: 'env', title: 'fp16 VAE', text: 'VAE decode in fp16 to fit the 4 GB UMA carve-out.', href: '../AMD_iGPU/README.md#8-files-added' },
+      { node: 'self_attn', file: 'launch flags', delta: 'env', title: 'SDPA + AOTriton', text: 'Forces PyTorch attention; AOTriton ships amd-gfx110x kernels.', href: '../AMD_iGPU/README.md#4-verified-on-this-machine' },
+      { node: 'cross_attn', file: 'launch flags', delta: 'env', title: 'SDPA + AOTriton', text: 'Cross-attention via SDPA.', href: '../AMD_iGPU/README.md#4-verified-on-this-machine' }
+    ]
+  },
+  tpu: {
+    name: 'Google TPU', short: 'TPU', color: '#d97706', soft: '#fef3c7',
+    status: 'Tested with Fooocus', hardware: 'Colab Pro · native torch_tpu',
+    lines: '825 (+789/−36)', difficulty: 'High',
+    summary: 'bf16 UNet/VAE; fp32 CLIP embeddings; forced SDPA; CLIP re-nested for Transformers 5.',
+    readme: '../Google_TPU/README.md', flow: SPINE, extraEdges: [], hide: [],
+    changes: [
+      { node: 'unet_in', file: 'model_management.py', delta: '+87/−8', title: 'bf16 UNet', text: 'UNet weights and compute in bf16.', href: '../Google_TPU/README.md#32-dtype-policy' },
+      { node: 'down1', file: 'model_management.py', delta: '+87/−8', title: 'bf16', text: 'Down blocks in bf16.', href: '../Google_TPU/README.md#32-dtype-policy' },
+      { node: 'mid', file: 'model_management.py', delta: '+87/−8', title: 'bf16', text: 'Middle block in bf16.', href: '../Google_TPU/README.md#32-dtype-policy' },
+      { node: 'up1', file: 'model_management.py', delta: '+87/−8', title: 'bf16', text: 'Up blocks in bf16.', href: '../Google_TPU/README.md#32-dtype-policy' },
+      { node: 'unet_out', file: 'model_management.py', delta: '+87/−8', title: 'bf16', text: 'Output conv in bf16.', href: '../Google_TPU/README.md#32-dtype-policy' },
+      { node: 'vae_dec', file: 'core.py', delta: '+27/−7', title: 'bf16 VAE', text: 'VAE decode in bf16; cast to float before NumPy.', href: '../Google_TPU/README.md#34-numerical--api-incompatibilities' },
+      { node: 'clip_l', file: 'modules/patch_clip.py', delta: '+53/−6', title: 'CLIP re-nest', text: '_LegacyCLIPTextModelLayout restores text_model.* names.', href: '../Google_TPU/README.md#35-clip-under-transformers-5--the-real-blocker' },
+      { node: 'clip_g', file: 'modules/patch_clip.py', delta: '+53/−6', title: 'CLIP re-nest', text: 'Same for CLIP-G.', href: '../Google_TPU/README.md#35-clip-under-transformers-5--the-real-blocker' },
+      { node: 'self_attn', file: 'attention.py', delta: '+7/−4', title: 'Forced SDPA', text: 'optimized_attention = attention_pytorch.', href: '../Google_TPU/README.md#33-attention' },
+      { node: 'cross_attn', file: 'attention.py', delta: '+7/−4', title: 'Forced SDPA', text: 'Cross-attention via SDPA.', href: '../Google_TPU/README.md#33-attention' }
+    ]
+  },
+  apple: {
+    name: 'Apple Silicon', short: 'Apple', color: '#059669', soft: '#d1fae5',
+    status: 'Ported; no benchmark numbers', hardware: 'Apple Silicon · unified memory',
+    lines: '298 (+175/−1 + 123 module)', difficulty: 'Low–medium',
+    summary: 'NF4 int4 UNet weights (~3.8x smaller); MPS, SDPA, fp16 compute.',
+    readme: '../Apple_Silicon/README.md', flow: SPINE, extraEdges: [], hide: [],
+    changes: [
+      { node: 'unet_in', file: 'modules/quantization.py', delta: '+123', title: 'NF4 int4', text: 'UNet conv weights in block-wise NF4 (64-elem blocks).', href: '../Apple_Silicon/README.md#int4-nf4-quantization' },
+      { node: 'down1', file: 'modules/quantization.py', delta: '+123', title: 'NF4 int4', text: 'Down block weights quantized.', href: '../Apple_Silicon/README.md#int4-nf4-quantization' },
+      { node: 'mid', file: 'modules/quantization.py', delta: '+123', title: 'NF4 int4', text: 'Middle block weights quantized.', href: '../Apple_Silicon/README.md#int4-nf4-quantization' },
+      { node: 'up1', file: 'modules/quantization.py', delta: '+123', title: 'NF4 int4', text: 'Up block weights quantized.', href: '../Apple_Silicon/README.md#int4-nf4-quantization' },
+      { node: 'unet_out', file: 'modules/quantization.py', delta: '+123', title: 'NF4 int4', text: 'Output conv weights quantized.', href: '../Apple_Silicon/README.md#int4-nf4-quantization' },
+      { node: 'self_attn', file: 'model_management.py', delta: '+116/−1', title: 'MPS SDPA', text: 'Attention via PyTorch SDPA on MPS.', href: '../Apple_Silicon/README.md#21-already-present--verifyenable' },
+      { node: 'cross_attn', file: 'model_management.py', delta: '+116/−1', title: 'MPS SDPA', text: 'Cross-attention via SDPA.', href: '../Apple_Silicon/README.md#21-already-present--verifyenable' }
+    ]
+  },
+  snap: {
+    name: 'Qualcomm Snapdragon X', short: 'Snapdragon', color: '#7c3aed', soft: '#ede9fe',
+    status: 'Tested with Fooocus', hardware: 'Surface Pro 11 · Hexagon NPU',
+    lines: '8,846 (+8,842/−4)', difficulty: 'Very high',
+    summary: 'UNet runs as w8a16 on HTP; CLIP-L/G as ONNX; VAE on NPU. Fixed 1024x1024 shapes.',
+    readme: '../Qualcomm_Snapdragon/README.md', flow: SPINE, extraEdges: [], hide: [],
+    changes: [
+      { node: 'unet_in', file: 'npu/qnn_sdxl.py', delta: '+311', title: 'w8a16 UNet', text: 'Input conv compiled to QNN (w8a16).', href: '../Qualcomm_Snapdragon/README.md#sdxl-five-graphs-two-forwards-per-step' },
+      { node: 'down1', file: 'npu/qnn_sdxl.py', delta: '+311', title: 'w8a16', text: 'Down blocks on HTP.', href: '../Qualcomm_Snapdragon/README.md#sdxl-five-graphs-two-forwards-per-step' },
+      { node: 'mid', file: 'npu/qnn_sdxl.py', delta: '+311', title: 'w8a16', text: 'Middle block on HTP.', href: '../Qualcomm_Snapdragon/README.md#sdxl-five-graphs-two-forwards-per-step' },
+      { node: 'up1', file: 'npu/qnn_sdxl.py', delta: '+311', title: 'w8a16', text: 'Up blocks on HTP.', href: '../Qualcomm_Snapdragon/README.md#sdxl-five-graphs-two-forwards-per-step' },
+      { node: 'unet_out', file: 'npu/qnn_sdxl.py', delta: '+311', title: 'w8a16', text: 'Output conv on HTP.', href: '../Qualcomm_Snapdragon/README.md#sdxl-five-graphs-two-forwards-per-step' },
+      { node: 'clip_l', file: 'npu/sdxl/image_encoder.py', delta: '+40', title: 'CLIP-L ONNX', text: 'CLIP-L runs as an ONNX graph on QNN.', href: '../Qualcomm_Snapdragon/README.md#sdxl-five-graphs-two-forwards-per-step' },
+      { node: 'clip_g', file: 'npu/sdxl/image_encoder.py', delta: '+40', title: 'CLIP-G ONNX', text: 'CLIP-G runs as an ONNX graph on QNN.', href: '../Qualcomm_Snapdragon/README.md#sdxl-five-graphs-two-forwards-per-step' },
+      { node: 'vae_dec', file: 'npu/sdxl/pipeline.py', delta: '+222', title: 'VAE on NPU', text: 'VAE decode runs on HTP, returns PNG base64.', href: '../Qualcomm_Snapdragon/README.md#inpainting-flow' }
+    ]
+  }
+};
+
+
+const NODE_INFO = {
+  clip_l: { what: 'CLIP-L text encoder (123M params). Storage fp32, compute fp32. Transformers 5 flattened its layout; TPU/AMX had to remap keys.' },
+  clip_g: { what: 'CLIP-G text encoder (694M params). Storage fp32, compute fp32.' },
+  clip_pool: { what: 'Pooled CLIP output (1x1280). Fed to the ADM conditioning.' },
+  clip_tok: { what: 'Tokenizer + token embedding. 77 tokens per prompt.' },
+  unet_in: { what: 'Input conv: 4 latent channels -> 320. First layer of the UNet.' },
+  down1: { what: 'Down block at 64x64, 320 channels. ResNet + self/cross attention.' },
+  down2: { what: 'Down block at 32x32, 640 channels. ResNet + self/cross attention.' },
+  down3: { what: 'Down block at 16x16, 1280 channels. ResNet + self/cross attention.' },
+  down4: { what: 'Down block at 8x8, 1280 channels. ResNet + self/cross attention.' },
+  mid: { what: 'Middle block at 8x8, 1280 channels. ResNet + self/cross attention.' },
+  up4: { what: 'Up block at 8x8, 1280 channels. ResNet + self/cross attention + skip.' },
+  up3: { what: 'Up block at 16x16, 1280 channels. ResNet + self/cross attention + skip.' },
+  up2: { what: 'Up block at 32x32, 640 channels. ResNet + self/cross attention + skip.' },
+  up1: { what: 'Up block at 64x64, 320 channels. ResNet + self/cross attention + skip.' },
+  unet_out: { what: 'Output conv: 320 -> 4 latent channels.' },
+  self_attn: { what: 'Self-attention over image tokens. Backend selected at import (xformers/SDPA/split).' },
+  cross_attn: { what: 'Cross-attention between image tokens and 77 text tokens. Doubles UNet work under CFG.' },
+  attn_norm: { what: 'LayerNorm inside attention. Kept fp32 for stability.' },
+  silu: { what: 'SiLU activation. Elementwise; runs in compute dtype.' },
+  timestep: { what: 'Timestep embedding MLP (1280 dim). Drives the diffusion schedule.' },
+  adm: { what: 'ADM: pooled CLIP + size/quality conditioning (5632 dim for SDXL).' },
+  vae_enc: { what: 'VAE encoder: 3 RGB channels -> 4 latent channels.' },
+  vae_quant: { what: 'Quant conv: 4 -> 4 channels.' },
+  vae_dec: { what: 'VAE decoder: 4 latent -> 3 RGB. Tiled to cap memory.' },
+  vae_norm: { what: 'GroupNorm in the VAE. Kept fp32.' }
+};
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const svgEl = document.getElementById('diagram');
+const world = document.getElementById('world');
+const panel = document.getElementById('panel');
+const toast = document.getElementById('toast');
+
+const state = { port: null, node: null, x: 40, y: 40, k: 0.62, moved: 0, autoFit: true };
+const pointers = new Map();
+let pinch = null;
+let dragStart = null;
+let toastTimer = null;
+
+const ALL_NODES = BASE_NODES.concat(...Object.values(PORT_NODES));
+const nodeById = (id) => ALL_NODES.find((n) => n.id === id);
+const edgeKey = (a, b) => a + '--' + b;
+const currentPort = () => (state.port ? PORTS[state.port] : null);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function svg(tag, attrs, parent) {
+  const e = document.createElementNS(SVGNS, tag);
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function svgText(parent, x, y, str, cls) {
+  const t = svg('text', { x, y, class: cls }, parent);
+  t.textContent = str;
+  return t;
+}
+function portsTouching(id) {
+  return Object.keys(PORTS).filter((k) => PORTS[k].changes.some((c) => c.node === id));
+}
+function portOfNode(id) {
+  return Object.keys(PORT_NODES).find((k) => PORT_NODES[k].some((n) => n.id === id)) || null;
+}
+function visibleNodes() {
+  const p = currentPort();
+  const hide = p ? new Set(p.hide) : new Set();
+  return BASE_NODES.filter((n) => !hide.has(n.id))
+    .concat(state.port && PORT_NODES[state.port] ? PORT_NODES[state.port] : []);
+}
+function edgesFor() {
+  const e = BASE_EDGES.slice();
+  if (state.port === 'snap') e.push(...SNAP_EDGES);
+  return e;
+}
+function hotSet(p) {
+  const s = new Set();
+  if (!p) return s;
+  for (let i = 0; i < p.flow.length - 1; i++) s.add(edgeKey(p.flow[i], p.flow[i + 1]));
+  for (const pair of p.extraEdges || []) s.add(edgeKey(pair[0], pair[1]));
+  return s;
+}
+
+function edgePath(a, b) {
+  const dx = (b.x + b.w / 2) - (a.x + a.w / 2);
+  const dy = (b.y + b.h / 2) - (a.y + a.h / 2);
+  const ac = { x: a.x + a.w / 2, y: a.y + a.h / 2 };
+  const bc = { x: b.x + b.w / 2, y: b.y + b.h / 2 };
+  let p1, p2, c1, c2;
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    const right = dx > 0;
+    p1 = { x: right ? a.x + a.w : a.x, y: ac.y };
+    p2 = { x: right ? b.x : b.x + b.w, y: bc.y };
+    const off = Math.max(30, Math.abs(p2.x - p1.x) * 0.45);
+    c1 = { x: p1.x + (right ? off : -off), y: p1.y };
+    c2 = { x: p2.x - (right ? off : -off), y: p2.y };
+  } else {
+    const down = dy > 0;
+    p1 = { x: ac.x, y: down ? a.y + a.h : a.y };
+    p2 = { x: bc.x, y: down ? b.y : b.y + b.h };
+    const off = Math.max(24, Math.abs(p2.y - p1.y) * 0.45);
+    c1 = { x: p1.x, y: p1.y + (down ? off : -off) };
+    c2 = { x: p2.x, y: p2.y - (down ? off : -off) };
+  }
+  return 'M' + p1.x + ',' + p1.y + ' C' + c1.x + ',' + c1.y + ' ' + c2.x + ',' + c2.y + ' ' + p2.x + ',' + p2.y;
+}
+
+function render() {
+  const port = currentPort();
+  document.documentElement.style.setProperty('--accent', port ? port.color : '#334155');
+  document.documentElement.style.setProperty('--accent-soft', port ? port.soft : '#e2e8f0');
+
+  while (world.firstChild) world.removeChild(world.firstChild);
+  svg('rect', { x: -3000, y: -3000, width: 8000, height: 8000, fill: 'url(#grid)' }, world);
+  svg('rect', { x: -3000, y: -3000, width: 8000, height: 8000, fill: 'url(#grid-lg)' }, world);
+
+  const nodes = visibleNodes();
+  const byId = {};
+  nodes.forEach((n) => { byId[n.id] = n; });
+  const hot = hotSet(port);
+
+  for (const [a, b] of edgesFor()) {
+    const A = byId[a], B = byId[b];
+    if (!A || !B) continue;
+    const isHot = hot.has(edgeKey(a, b));
+    const e = svg('path', {
+      class: 'edge' + (isHot ? ' hot' : '') + (port && !isHot ? ' dim' : ''),
+      d: edgePath(A, B)
+    }, world);
+    e.setAttribute('marker-end', isHot ? 'url(#arrow-accent)' : 'url(#arrow-neutral)');
+  }
+
+  if (state.port === 'snap') {
+    const y = TOP + 7 * ROW - 16;
+    const g = svg('g', null, world);
+    svg('line', { x1: 58, y1: y, x2: 1362, y2: y, class: 'divider-line' }, g);
+    svgText(g, 64, y - 10, 'x64 Fooocus process', 'lane-label');
+    svgText(g, 64, y + 18, 'native ARM64 QNN process', 'lane-label');
+    svg('rect', { x: 950, y: y - 12, width: 340, height: 24, rx: 12, class: 'divider-pill' }, g);
+    svgText(g, 1120, y + 3.5, 'HTTP · 127.0.0.1:7867 · PNG base64', 'divider-text');
+  }
+
+  for (const n of nodes) {
+    const isPort = !!n.portnode;
+    const touched = !isPort && !!port && port.changes.some((c) => c.node === n.id);
+    const selected = state.node === n.id;
+    const cls = 'node' + (n.side ? ' side' : '') + (isPort ? ' portnode' : '')
+      + (touched || isPort ? ' touched' : '') + (selected ? ' selected' : '');
+    const g = svg('g', {
+      class: cls, transform: 'translate(' + n.x + ',' + n.y + ')',
+      'data-id': n.id, tabindex: '0', role: 'button',
+      'aria-label': n.title + ', ' + n.where
+    }, world);
+    svg('title', null, g).textContent = n.title + ' — ' + n.where;
+    svg('rect', { class: 'bg', width: n.w, height: n.h, rx: 10 }, g);
+    svg('rect', { class: 'bar', x: 0, y: 9, width: 4, height: n.h - 18, rx: 2 }, g);
+    svgText(g, 16, 25, n.title, 'title');
+    svgText(g, 16, 44, n.sub[0], 'sub');
+    if (n.sub[1]) svgText(g, 16, 59, n.sub[1], 'sub');
+    svgText(g, 16, 73, n.where, 'where');
+
+    if (port) {
+      const count = port.changes.filter((c) => c.node === n.id).length;
+      if (count > 0) {
+        svg('circle', { class: 'badge', cx: n.w - 16, cy: 16, r: 9 }, g);
+        svgText(g, n.w - 16, 19.4, String(count), 'badge-t');
+      }
+    } else {
+      const touchedBy = portsTouching(n.id);
+      if (touchedBy.length) {
+        // Overlay each port's colour as a stacked strip on the left edge so
+        // every port that changed this node is visible at once in the
+        // "all ports" view.
+        const segH = (n.h - 4) / touchedBy.length;
+        touchedBy.forEach((k, i) => {
+          svg('rect', { x: 0, y: 2 + i * segH, width: 4, height: segH - 1, fill: PORTS[k].color }, g);
+        });
+        svg('circle', { cx: n.w - 16, cy: 16, r: 9, fill: '#64748b' }, g);
+        svgText(g, n.w - 16, 19.4, String(touchedBy.length), 'badge-t');
+      }
+    }
+  }
+
+  applyTransform();
+  if (state.autoFit) fit();
+  if (state.node) {
+    const el = world.querySelector('[data-id="' + state.node + '"]');
+    if (el) el.focus({ preventScroll: true });
+  }
+}
+
+function applyTransform() {
+  world.setAttribute('transform', 'translate(' + state.x + ' ' + state.y + ') scale(' + state.k + ')');
+  const label = document.querySelector('[data-act="resetzoom"]');
+  if (label) label.textContent = Math.round(state.k * 100) + '%';
+}
+
+function fit() {
+  const nodes = visibleNodes();
+  if (!nodes.length) return;
+  const minX = Math.min(...nodes.map((n) => n.x)) - 40;
+  const maxX = Math.max(...nodes.map((n) => n.x + n.w)) + 40;
+  const minY = Math.min(...nodes.map((n) => n.y)) - 40;
+  const maxY = Math.max(...nodes.map((n) => n.y + n.h)) + 40;
+  const r = svgEl.getBoundingClientRect();
+  const bw = maxX - minX, bh = maxY - minY;
+  state.k = Math.max(0.2, Math.min((r.width - 60) / bw, (r.height - 70) / bh, 1.05));
+  state.x = (r.width - bw * state.k) / 2 - minX * state.k;
+  state.y = (r.height - bh * state.k) / 2 - minY * state.k;
+  applyTransform();
+}
+
+function zoomAt(factor, cx, cy) {
+  const k2 = Math.min(3, Math.max(0.18, state.k * factor));
+  const wx = (cx - state.x) / state.k;
+  const wy = (cy - state.y) / state.k;
+  state.x = cx - wx * k2;
+  state.y = cy - wy * k2;
+  state.k = k2;
+  applyTransform();
+}
+
+function centerOn(n) {
+  const r = svgEl.getBoundingClientRect();
+  state.k = Math.max(state.k, 0.72);
+  state.x = r.width / 2 - (n.x + n.w / 2) * state.k;
+  state.y = r.height / 2 - (n.y + n.h / 2) * state.k;
+  applyTransform();
+}
+
+/* ---------- panel ---------- */
+
+function renderPanel() {
+  const inner = document.createElement('div');
+  inner.className = 'panel-inner';
+  if (state.node && nodeById(state.node)) renderNodePanel(inner);
+  else if (state.port) renderPortPanel(inner);
+  else renderOverviewPanel(inner);
+  panel.replaceChildren(inner);
+}
+
+function facts(p) {
+  return '<div class="facts">'
+    + '<div><dt>Status</dt><dd>' + p.status + '</dd></div>'
+    + '<div><dt>Difficulty</dt><dd>' + p.difficulty + '</dd></div>'
+    + '<div><dt>Hardware</dt><dd>' + p.hardware + '</dd></div>'
+    + '<div><dt>Lines changed</dt><dd>' + p.lines + '</dd></div>'
+    + '</div>';
+}
+
+function renderPortPanel(el) {
+  const p = PORTS[state.port];
+  let html = '<div class="eyebrow"><span class="dot"></span>Port overlay</div>'
+    + '<h2>' + p.name + '</h2>'
+    + '<p class="lede">' + p.summary + '</p>'
+    + facts(p)
+    + '<div class="actions"><a class="btn primary block" href="' + p.readme + '">Open the full write-up →</a></div>'
+    + '<h3>Changes <span style="color:var(--faint)">' + p.changes.length + '</span></h3>'
+    + '<ol class="changes">';
+  p.changes.forEach((c, i) => {
+    const active = state.node === c.node ? ' active' : '';
+    html += '<li class="change' + active + '">'
+      + '<button class="change-main" data-select-node="' + c.node + '">'
+      + '<span class="change-top"><span class="num">' + (i + 1) + '</span>'
+      + '<span class="file">' + c.file + '</span><span class="delta">' + c.delta + '</span></span>'
+      + '<span class="change-title">' + c.title + '</span>'
+      + '<span class="change-text">' + c.text + '</span>'
+      + '</button>'
+      + '<a class="change-link" href="' + c.href + '" target="_blank" rel="noopener" aria-label="Open this section in the write-up">↗</a>'
+      + '</li>';
+  });
+  html += '</ol>';
+  el.innerHTML = html;
+}
+
+function renderNodePanel(el) {
+  const n = nodeById(state.node);
+  const p = currentPort();
+  const info = NODE_INFO[n.id] || { what: '' };
+  const changes = p ? p.changes.filter((c) => c.node === n.id) : [];
+  let html = '<button class="backbtn" data-clear-node>← ' + (p ? p.name + ' changes' : 'Overview') + '</button>'
+    + '<div class="eyebrow"><span class="dot"></span>' + (p ? p.name : 'Upstream Fooocus') + '</div>'
+    + '<h2>' + n.title + '</h2>'
+    + '<span class="node-where">' + n.where + '</span>'
+    + '<p class="node-what">' + info.what + '</p>';
+
+  if (n.src) {
+    html += '<div class="actions"><a class="btn" href="' + n.src + '" target="_blank" rel="noopener">View upstream source ↗</a></div>';
+  } else if (p) {
+    html += '<div class="actions"><a class="btn" href="' + p.readme + '">Port write-up ↗</a></div>';
+  }
+
+  if (p) {
+    html += '<h3>Changes on this stage</h3>';
+    if (changes.length) {
+      html += '<div class="node-changes">';
+      changes.forEach((c) => {
+        html += '<div class="node-change"><b>' + c.title + '</b>'
+          + '<div class="meta">' + c.file + ' · ' + c.delta + '</div>'
+          + '<p>' + c.text + '</p>'
+          + '<div class="actions"><a class="btn" href="' + c.href + '" target="_blank" rel="noopener">Open section ↗</a></div></div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p class="empty">This stage is unchanged in the ' + p.name + ' port. The selected port uses a different path or a policy outside this node.</p>';
+    }
+  } else {
+    const touching = portsTouching(n.id);
+    html += '<h3>Changed by</h3>';
+    if (touching.length) {
+      html += '<div class="port-list">';
+      touching.forEach((k) => {
+        const q = PORTS[k];
+        const count = q.changes.filter((c) => c.node === n.id).length;
+        html += '<button class="port-btn" data-set-port="' + k + '" style="--pc:' + q.color + '">'
+          + '<span class="dot"></span><span><b>' + q.name + '</b>'
+          + '<small>' + count + (count === 1 ? ' change' : ' changes') + ' on this stage</small></span>'
+          + '<span class="diff">' + q.short + ' →</span></button>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p class="empty">No port changed this stage directly. It is shared infrastructure and runs the same way on every backend.</p>';
+    }
+  }
+  el.innerHTML = html;
+}
+
+function renderOverviewPanel(el) {
+  const flow = (txt) => '<pre class="flow">' + esc(txt).trim() + '</pre>';
+  let html = '<div class="eyebrow"><span class="dot"></span>Architecture map</div>'
+    + '<h2>Fooocus 2.5.5</h2>'
+    + '<p class="lede">SDXL model graph: CLIP text encoders, UNet with attention, and the VAE. The five ports change dtypes, attention, and quantization at different nodes. The written notes are in <a href="README.md">README.md</a>.</p>'
+    + '<h3>Choose a port</h3><div class="port-list">';
+  Object.keys(PORTS).forEach((k) => {
+    const p = PORTS[k];
+    html += '<button class="port-btn" data-set-port="' + k + '" style="--pc:' + p.color + '">'
+      + '<span class="dot"></span><span><b>' + p.name + '</b>'
+      + '<small>' + p.lines + ' · ' + p.hardware + '</small></span>'
+      + '<span class="diff">' + p.difficulty + '</span></button>';
+  });
+  html += '</div>'
+    + '<h3>How to read the map</h3>'
+    + '<p class="lede">Click a node for its upstream code path. Select a port to highlight the path it changes and list the edits. The coloured dots on a node show which ports touched it.</p>';
+
+  html += '<h3>Architecture notes (from README.md)</h3>';
+
+  html += '<details class="note" open><summary>1. Process shape</summary>'
+    + '<p class="lede">Three layers in one process: Gradio UI, a single queue worker that owns the pipeline, and a patched copy of ComfyUI under <code>ldm_patched/</code>. <code>patch_all()</code> runs once at import and replaces the loader, UNet forward, ControlNet forward, CFG function, and weight loader.</p>'
+    + flow('launch.py\n  prepare_environment()          launch.py:29\n  import webui\n        |\n        v\nwebui.py\n  gr.Blocks(...).queue()         webui.py:153\n  generate_clicked(args)         webui.py:33\n    -> worker.AsyncTask(args)    async_worker.py:10\n        |\n        v\nasync_worker.worker()           async_worker.py:168\n  task = queue.get()\n  handler(task)                  async_worker.py:1071')
+    + '</details>';
+
+  html += '<details class="note"><summary>2. Request path</summary>'
+    + '<p class="lede">Task type decides the branch: text-to-image goes straight to <code>process_diffusion</code>; inpaint, outpaint, upscale, and vary build a latent or image first, then reuse the same sampler.</p>'
+    + flow('handler(task)                          async_worker.py:1071\n  process_prompt(...)                async_worker.py:641\n    refresh_everything(...)          default_pipeline.py:234\n    clip_encode(...)                 default_pipeline.py:182\n  apply_control_nets / apply_inpaint /\n  apply_vary / apply_upscale         async_worker.py:396-628\n  process_task(...)                  async_worker.py:280\n    process_diffusion(...)          default_pipeline.py:336')
+    + '</details>';
+
+  html += '<details class="note"><summary>3. Sampling loop</summary>'
+    + '<p class="lede">CFG doubles the UNet work (positive and negative conditioning). Attention is selected once at import and called from every transformer block.</p>'
+    + flow('process_diffusion()                     default_pipeline.py:336\n  core.ksampler()                   core.py:265\n    samplers.sample = sample_hijacked  sample_hijack.py:89\n    KSampler loop                   samplers.py:652\n      model.apply_model(x, sigma, cond)\n        -> UNetModel.forward       openaimodel.py:816\n           -> patched_unet_forward patch.py:376\n      sampling_function(...)       samplers.py:242\n      scheduler.step(...)\n  core.decode_vae()                 core.py:160\n  pytorch_to_numpy()                core.py:330')
+    + '</details>';
+
+  html += '<details class="note"><summary>4. Model load, dtype, attention</summary>'
+    + '<p class="lede">The highest-leverage seams after dtype. A backend without xformers must use PyTorch SDPA or fall back to split/quadratic paths.</p>'
+    + flow('ModelPatcher.load()                     model_patcher.py\n  load_models_gpu()                model_management.py:379\n    get_torch_device()\n    get_total_memory() / get_free_memory()\n    unet_inital_load_device()\n    should_use_fp16()\n  ModelPatcher.patch_model()\n    calculate_weight()             patch.py:52\n\nattention.py\n  optimized_attention = attention_basic\n  if xformers_enabled(): attention_xformers\n  elif pytorch_attention_enabled(): attention_pytorch (SDPA)')
+    + '</details>';
+
+  html += '<details class="note"><summary>5. Where ports hook in</summary>'
+    + '<table class="note-table"><thead><tr><th>Port</th><th>Device / dtype</th><th>Attention</th></tr></thead><tbody>'
+    + '<tr><td>Intel AMX</td><td>bf16 autocast around UNet, VAE, CLIP</td><td>SDPA on CPU</td></tr>'
+    + '<tr><td>AMD iGPU</td><td>ROCm sees cuda:0; fp16 VAE</td><td>SDPA + AOTriton gfx110x</td></tr>'
+    + '<tr><td>Google TPU</td><td>bf16 UNet/VAE; fp32 CLIP</td><td>Forced SDPA</td></tr>'
+    + '<tr><td>Apple Silicon</td><td>NF4 UNet, fp16 compute</td><td>SDPA</td></tr>'
+    + '<tr><td>Snapdragon X</td><td>w8a16 UNet on HTP</td><td>Fixed in QNN graph</td></tr>'
+    + '</tbody></table></details>';
+
+  html += '<details class="note"><summary>7. Module map</summary>'
+    + '<table class="note-table"><tbody>'
+    + '<tr><td>launch.py</td><td>Environment check, model download, imports webui</td></tr>'
+    + '<tr><td>webui.py</td><td>Gradio UI, generate_clicked, resource meter</td></tr>'
+    + '<tr><td>modules/async_worker.py</td><td>Queue worker, task dispatch, image save</td></tr>'
+    + '<tr><td>modules/default_pipeline.py</td><td>Model refresh, CLIP encode, sigmas, diffusion</td></tr>'
+    + '<tr><td>modules/core.py</td><td>Latent helpers, ksampler, VAE decode, NumPy conversion</td></tr>'
+    + '<tr><td>modules/patch.py</td><td>One-time monkeypatches for loading, UNet, CFG, ControlNet</td></tr>'
+    + '<tr><td>ldm_patched/modules/model_management.py</td><td>Device, dtype, VRAM, offload</td></tr>'
+    + '<tr><td>ldm_patched/ldm/modules/attention.py</td><td>Attention backend selection</td></tr>'
+    + '<tr><td>ldm_patched/modules/samplers.py</td><td>KSampler, CFG sampling_function</td></tr>'
+    + '</tbody></table></details>';
+
+  html += '<details class="note"><summary>8. Scope notes</summary>'
+    + '<p class="lede">The map describes the upstream architecture, not every Fooocus feature: enhance, describe, and face-restore paths are folded into <code>handler</code> branches. Port overlays show the code path that changed. The interactive page is self-contained (no CDN, no build step, no external JavaScript).</p></details>';
+
+  html += '<div class="actions"><a class="btn block" href="README.md">Full written architecture notes →</a></div>';
+  el.innerHTML = html;
+}
+
+/* ---------- selection + url ---------- */
+
+function syncChips() {
+  document.querySelectorAll('[data-port]').forEach((b) => {
+    b.setAttribute('aria-pressed', String((b.dataset.port === 'all' && !state.port) || b.dataset.port === state.port));
+  });
+}
+function updateHash() {
+  const params = new URLSearchParams();
+  if (state.port) params.set('port', state.port);
+  if (state.node) params.set('node', state.node);
+  const s = params.toString();
+  history.replaceState(null, '', s ? '#' + s : '#');
+}
+function selectPort(id) {
+  state.port = id === 'all' ? null : id;
+  state.node = null;
+  if (state.port) state.autoFit = true;
+  syncChips();
+  render();
+  renderPanel();
+  updateHash();
+}
+function selectNode(id, center) {
+  const pp = portOfNode(id);
+  if (pp) state.port = pp;
+  if (state.port && PORTS[state.port].hide.includes(id)) state.port = null;
+  state.node = id;
+  syncChips();
+  render();
+  renderPanel();
+  updateHash();
+  if (center) {
+    const n = nodeById(id);
+    if (n) centerOn(n);
+  }
+}
+function clearNode() {
+  state.node = null;
+  render();
+  renderPanel();
+  updateHash();
+}
+
+/* ---------- events ---------- */
+
+document.querySelectorAll('[data-port]').forEach((chip) => {
+  chip.addEventListener('click', () => selectPort(chip.dataset.port));
+});
+
+panel.addEventListener('click', (e) => {
+  const sel = e.target.closest('[data-select-node]');
+  if (sel) { selectNode(sel.dataset.selectNode, true); return; }
+  const set = e.target.closest('[data-set-port]');
+  if (set) { selectPort(set.dataset.setPort); return; }
+  if (e.target.closest('[data-clear-node]')) { clearNode(); }
+});
+
+document.querySelectorAll('[data-act]').forEach((b) => {
+  b.addEventListener('click', () => {
+    const act = b.dataset.act;
+    const r = svgEl.getBoundingClientRect();
+    if (act === 'in') zoomAt(1.22, r.width / 2, r.height / 2);
+    if (act === 'out') zoomAt(1 / 1.22, r.width / 2, r.height / 2);
+    if (act === 'resetzoom') {
+      const cx = r.width / 2, cy = r.height / 2;
+      zoomAt(1 / state.k, cx, cy);
+    }
+    if (act === 'fit') { state.autoFit = true; fit(); }
+    if (act === 'reset') { state.autoFit = true; selectPort('all'); fit(); }
+    if (act === 'copy') {
+      navigator.clipboard.writeText(location.href)
+        .then(() => showToast('Link copied'))
+        .catch(() => showToast('Copy failed; use the address bar'));
+    }
+  });
+});
+
+function screenPoint(e) {
+  const r = svgEl.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+svgEl.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0 && e.pointerType === 'mouse') return;
+  const p = screenPoint(e);
+  pointers.set(e.pointerId, p);
+  try { svgEl.setPointerCapture(e.pointerId); } catch (err) {}
+  if (pointers.size === 1) {
+    dragStart = { x: p.x, y: p.y };
+    state.moved = 0;
+    state.autoFit = false;
+    svgEl.classList.add('dragging');
+  } else if (pointers.size === 2) {
+    const [a, b] = Array.from(pointers.values());
+    pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), m: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } };
+    state.moved = 99;
+  }
+});
+
+svgEl.addEventListener('pointermove', (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  const p = screenPoint(e);
+  pointers.set(e.pointerId, p);
+  if (pointers.size === 2 && pinch) {
+    const [a, b] = Array.from(pointers.values());
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    if (d > 0 && pinch.d > 0) zoomAt(d / pinch.d, m.x, m.y);
+    state.x += m.x - pinch.m.x;
+    state.y += m.y - pinch.m.y;
+    pinch = { d, m };
+    applyTransform();
+  } else if (pointers.size === 1 && dragStart) {
+    const dx = p.x - dragStart.x;
+    const dy = p.y - dragStart.y;
+    state.moved = Math.max(state.moved, Math.hypot(dx, dy));
+    state.x += dx;
+    state.y += dy;
+    dragStart = { x: p.x, y: p.y };
+    applyTransform();
+  }
+});
+
+function endPointer(e) {
+  const had = pointers.has(e.pointerId);
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (pointers.size === 1) {
+    const p = Array.from(pointers.values())[0];
+    dragStart = { x: p.x, y: p.y };
+  }
+  if (pointers.size === 0) {
+    svgEl.classList.remove('dragging');
+    if (had && e.type === 'pointerup' && state.moved < 5) {
+      // Pointer capture retargets events to the svg, so hit-test instead of
+      // trusting e.target.
+      const hit = document.elementFromPoint(e.clientX, e.clientY);
+      const target = hit && hit.closest ? hit.closest('.node') : null;
+      if (target) selectNode(target.getAttribute('data-id'));
+      else if (state.node) clearNode();
+    }
+    dragStart = null;
+  }
+}
+svgEl.addEventListener('pointerup', endPointer);
+svgEl.addEventListener('pointercancel', endPointer);
+svgEl.addEventListener('pointerleave', (e) => {
+  if (pointers.has(e.pointerId) && e.pointerType !== 'mouse') endPointer(e);
+});
+
+svgEl.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const p = screenPoint(e);
+  zoomAt(Math.exp(-e.deltaY * 0.0012), p.x, p.y);
+  state.autoFit = false;
+}, { passive: false });
+
+svgEl.addEventListener('keydown', (e) => {
+  const g = e.target.closest ? e.target.closest('.node') : null;
+  if (g && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    selectNode(g.getAttribute('data-id'));
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target && e.target.matches && e.target.matches('input, textarea, select')) return;
+  const r = svgEl.getBoundingClientRect();
+  if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomAt(1.2, r.width / 2, r.height / 2); state.autoFit = false; }
+  if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomAt(1 / 1.2, r.width / 2, r.height / 2); state.autoFit = false; }
+  if (e.key === '0') { e.preventDefault(); state.autoFit = true; fit(); }
+  if (e.key === 'Escape') {
+    if (state.node) clearNode();
+    else if (state.port) selectPort('all');
+  }
+});
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function readHash() {
+  const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const p = params.get('port');
+  if (p && PORTS[p]) state.port = p;
+  const n = params.get('node');
+  if (n && nodeById(n)) {
+    const pp = portOfNode(n);
+    if (pp) state.port = pp;
+    if (!state.port || !PORTS[state.port].hide.includes(n)) state.node = n;
+  }
+}
+
+window.addEventListener('hashchange', () => {
+  state.port = null;
+  state.node = null;
+  readHash();
+  syncChips();
+  render();
+  renderPanel();
+});
+
+new ResizeObserver(() => {
+  if (state.autoFit) fit();
+  else applyTransform();
+}).observe(document.querySelector('.canvas-wrap'));
+
+readHash();
+syncChips();
+render();
+renderPanel();
+fit();
+</script>
+</body>
+</html>
