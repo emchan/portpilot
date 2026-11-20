@@ -42,6 +42,8 @@ Consider all repositories in the GitHub organization https://github.com/pinokiof
    - GGUF / llama.cpp usage, including CUDA-only loaders.
    - Quantization libraries: bitsandbytes, torchao, optimum-quanto; note the absence of GPTQ, AWQ, ExLlama, HQQ, ONNX Runtime quantization, TensorRT INT8/FP8, and vLLM quantization flags.
    - For every signal, cite `file:line` evidence and state the porting implication for AMD/ROCm and Apple/MPS.
+   - Put an **executive summary** at the top counting instances of each explicit datatype (`float`/FP32, `float16`/FP16, `bfloat16`/BF16, `float8`/FP8, NVFP4/FP4, int8, uint8, int4, NF4, int16/32/64, float64, bool, complex) plus cast/quantization API signals, with matching-line counts and affected-repo counts; state the counting convention and include zero-match datatypes.
+   - Add a detailed table of every cast and precision-manipulation line with **Project**, **Commit** (short SHA linked to the commit), **Line** (direct blob link with `#L<line>`), **Datatype(s)**, **Kind** (`explicit cast`, `mixed precision`, `quantization API`, `dtype declaration`, `checkpoint / config`) and the matching evidence snippet.
 10. Use the exact final paths `results/pinokio-apps.md`, `results/<repo>.md`, `analysis/kernels.md`, and `analysis/quantization.md`. Link both analysis notes to `../results/pinokio-apps.md`, and link `analysis/quantization.md` to `kernels.md`.
 11. State the analyzed commit SHA in every `results/<repo>.md` report (N/A for empty repositories) and note the snapshot date and commit-recording convention in the summary and both analysis notes.
 
