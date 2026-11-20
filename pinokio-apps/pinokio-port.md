@@ -6,11 +6,11 @@ Use this prompt to reproduce the full study in one pass.
 
 **Prompt:**
 
-Consider all repositories in the GitHub organization https://github.com/pinokiofactory. For each repository:
+Consider all repositories in the GitHub organization https://github.com/pinokiofactory. Analyze the `main` branch tip of each repository (source snapshots fetched from `https://codeload.github.com/pinokiofactory/<repo>/tar.gz/refs/heads/main` on 2026-11-20); **no git tag was analyzed**. For each repository:
 
 1. Fetch the repository tree and any `requirements*.txt` files (root or nested). Record their full dependency lists.
 2. Fetch README.md, install.js, and torch.js (if present) and scan them for platform/GPU support signals (NVIDIA-only markers, AMD/ROCm, macOS/Apple Silicon/MPS, CUDA).
-3. Clone each repository locally when needed and inspect Python imports for repos that lack a requirements file.
+3. Clone each repository locally when needed and inspect Python imports for repos that lack a requirements file. Record the default-branch (`main`) commit SHA of every snapshot that is analyzed.
 4. Build a Markdown table named `results/pinokio-apps.md` with columns:
    - Repository (linked to its GitHub URL)
    - Platform support (NVIDIA only / NVIDIA / AMD / Mac / Cross-platform / Mac (Apple Silicon) only)
@@ -29,5 +29,18 @@ Consider all repositories in the GitHub organization https://github.com/pinokiof
    - Lines of non-CUDA code
    - CUDA-related functions used
 7. Save everything to `results/pinokio-apps.md` (create the `results/` directory if needed).
+8. Create an `analysis/` folder and write `analysis/kernels.md` covering:
+   - Which projects use CUDA Graphs (`cudaGraphLaunch`, `cudaGraphInstantiate`, `torch.cuda.graph`, stream capture, etc.) and where.
+   - Which projects use Triton, distinguishing direct Python code from optional `triton` / `triton-windows` wheel installs, and noting whether any `@triton.jit` kernels exist.
+   - Whether Vulkan, explicit Metal APIs, Apple MPS, or MLX are used.
+   - Attention kernels: FlashAttention, SageAttention, xformers, PyTorch SDPA, FlashInfer/vLLM/PagedAttention.
+   - For every signal, cite `file:line` evidence from the repository snapshot and state the porting implication for AMD/ROCm and Apple/MPS.
+9. In the same folder, write `analysis/quantization.md` covering:
+   - Quantized weights and runtime quantization settings; call out false positives such as dtype tables or audio codec quantizers.
+   - GGUF / llama.cpp usage, including CUDA-only loaders.
+   - Quantization libraries: bitsandbytes, torchao, optimum-quanto; note the absence of GPTQ, AWQ, ExLlama, HQQ, ONNX Runtime quantization, TensorRT INT8/FP8, and vLLM quantization flags.
+   - For every signal, cite `file:line` evidence and state the porting implication for AMD/ROCm and Apple/MPS.
+10. Use the exact final paths `results/pinokio-apps.md`, `results/<repo>.md`, `analysis/kernels.md`, and `analysis/quantization.md`. Link both analysis notes to `../results/pinokio-apps.md`, and link `analysis/quantization.md` to `kernels.md`.
+11. State the analyzed commit SHA in every `results/<repo>.md` report (N/A for empty repositories) and note the snapshot date and commit-recording convention in the summary and both analysis notes.
 
-Output the complete table and summary.
+Output the complete table, summary, and analysis notes.
