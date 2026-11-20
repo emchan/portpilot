@@ -35,6 +35,8 @@ Consider all repositories in the GitHub organization https://github.com/pinokiof
    - Whether Vulkan, explicit Metal APIs, Apple MPS, or MLX are used.
    - Attention kernels: FlashAttention, SageAttention, xformers, PyTorch SDPA, FlashInfer/vLLM/PagedAttention.
    - For every signal, cite `file:line` evidence from the repository snapshot and state the porting implication for AMD/ROCm and Apple/MPS.
+   - Add a **Commit** column to every per-project table in `analysis/kernels.md` (not the at-a-glance summary), showing the short analyzed SHA and linking it to `https://github.com/pinokiofactory/<repo>/commit/<sha>`.
+   - Make every `file:line` reference a direct link to `https://github.com/pinokiofactory/<repo>/blob/<sha>/<path>#L<line>`; use a dedicated **Line** column where one exists and a **Line / evidence** column elsewhere.
 9. In the same folder, write `analysis/quantization.md` covering:
    - Quantized weights and runtime quantization settings; call out false positives such as dtype tables or audio codec quantizers.
    - GGUF / llama.cpp usage, including CUDA-only loaders.
