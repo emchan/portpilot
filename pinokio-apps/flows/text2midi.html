@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>text2midi — matmul flow</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1b2631;background:#f4f6f7}
+header{background:#1b2631;color:#fff;padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0}header a{color:#85c1e9}
+.controls{display:flex;gap:8px;align-items:center;padding:8px 16px;background:#fff;border-bottom:1px solid #d5dbdb;flex-wrap:wrap}
+button,select,input{font-size:13px;padding:5px 9px;border:1px solid #aab7b8;border-radius:5px;background:#fff;cursor:pointer}
+button:hover{background:#eaf2f8}
+.chip{display:inline-block;border:1px solid;border-radius:10px;padding:1px 7px;font-size:11px;margin-right:5px;background:#fff}
+#wrap{position:relative;overflow:hidden;height:calc(100vh - 104px);cursor:grab}
+#wrap.drag{cursor:grabbing}svg{display:block;width:100%;height:100%}
+#tip{position:absolute;pointer-events:none;background:#1b2631;color:#fff;padding:9px 11px;border-radius:6px;font-size:12px;line-height:1.5;display:none;max-width:340px;z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#info{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.95);border:1px solid #d5dbdb;border-radius:6px;padding:8px 11px;font-size:12px}
+.muted{color:#566573}
+</style></head><body>
+<header><h1>text2midi · matrix-multiply flow</h1>
+<a href="../results/pinokio-apps.md">portability study</a>
+<a href="../analysis/flows.md">flow summary</a>
+<a href="text2midi.md">markdown</a></header>
+<div class="controls">
+<button id="zin">Zoom +</button><button id="zout">Zoom −</button><button id="reset">Reset</button>
+<label>Component <select id="filter"><option value="">All</option></select></label>
+<input id="search" placeholder="Find tensor…" size="22">
+<span class="muted">0 nodes · drag to pan · scroll to zoom · hover a node for A/B/C</span>
+</div>
+<div id="wrap"><svg id="svg" viewBox="0 0 1320 800">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#aab7b8"/></marker></defs>
+<g id="viewport"><g id="edges"></g><g id="nodes"></g></g>
+</svg><div id="tip"></div>
+<div id="info"><b>A × B → C</b> · colours = weight precision · <span id="count"></span></div>
+</div>
+<script>
+const DATA=[];const svg=document.getElementById('svg'),vp=document.getElementById('viewport'),
+wrap=document.getElementById('wrap'),tip=document.getElementById('tip');
+let tx=0,ty=0,sc=1,drag=false,lx=0,ly=0;
+function apply(){vp.setAttribute('transform',`translate(${tx},${ty}) scale(${sc})`)}
+function zoom(f,cx,cy){const ns=Math.max(.15,Math.min(3,sc*f));tx=cx-(cx-tx)*(ns/sc);ty=cy-(cy-ty)*(ns/sc);sc=ns;apply()}
+svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY<0?1.12:1/1.12,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+wrap.addEventListener('mousedown',e=>{if(e.target.closest('.node'))return;drag=true;lx=e.clientX;ly=e.clientY;wrap.classList.add('drag')});
+window.addEventListener('mousemove',e=>{if(drag){tx+=e.clientX-lx;ty+=e.clientY-ly;lx=e.clientX;ly=e.clientY;apply()}});
+window.addEventListener('mouseup',()=>{drag=false;wrap.classList.remove('drag')});
+document.getElementById('zin').onclick=()=>zoom(1.2,innerWidth/2,innerHeight/2);
+document.getElementById('zout').onclick=()=>zoom(1/1.2,innerWidth/2,innerHeight/2);
+document.getElementById('reset').onclick=()=>{tx=0;ty=0;sc=1;apply()};
+document.getElementById('filter').onchange=filter;document.getElementById('search').oninput=filter;
+function filter(){const c=document.getElementById('filter').value,q=document.getElementById('search').value.toLowerCase();let n=0;
+DATA.forEach((d,i)=>{const g=document.querySelector(`.node[data-i="${i}"]`);const ok=(!c||d.component===c)&&(!q||d.tensor.toLowerCase().includes(q)||d.kind.toLowerCase().includes(q));g.style.display=ok?'':'none';if(ok)n++});
+document.getElementById('count').textContent=n+' visible'}
+document.querySelectorAll('.node').forEach(g=>{const i=+g.dataset.i,d=DATA[i];
+g.addEventListener('mousemove',e=>{tip.innerHTML='<b>'+d.tensor+'</b><br>'+d.model+' · '+d.component+' block '+d.block+'<br>'+d.kind+'<br>A: '+d.A.shape+' '+d.A.dtype+'<br>B: '+d.B.shape+' '+d.B.dtype+'<br>C: '+d.C.shape+' '+d.C.dtype;tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px'});
+g.addEventListener('mouseleave',()=>tip.style.display='none')});
+filter();apply();
+</script></body></html>
