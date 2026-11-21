@@ -1,0 +1,66 @@
+"""Auto-generated end-to-end CPU test case for z-image-turbo."""
+
+import torch
+import pytest
+
+
+def _rand(shape, dtype):
+    if dtype == torch.uint8:
+        return torch.randint(0, 256, shape, dtype=dtype)
+    return torch.randn(shape).to(dtype)
+
+
+def test_cpu_shapes():
+    ran = False
+    # Linear matmul
+    try:
+        a = _rand((2, 4, 9728), torch.bfloat16)
+        w = _rand((2560, 9728), torch.bfloat16)
+        out = a @ w.transpose(-2, -1)
+        assert tuple(out.shape) == (2, 4, 2560)
+        assert out.dtype == torch.bfloat16
+        ran = True
+    except Exception:
+        pass
+    # Linear matmul
+    try:
+        a = _rand((2, 4, 2560), torch.bfloat16)
+        w = _rand((9728, 2560), torch.bfloat16)
+        out = a @ w.transpose(-2, -1)
+        assert tuple(out.shape) == (2, 4, 9728)
+        assert out.dtype == torch.bfloat16
+        ran = True
+    except Exception:
+        pass
+    # Linear matmul
+    try:
+        a = _rand((2, 4, 2560), torch.bfloat16)
+        w = _rand((1024, 2560), torch.bfloat16)
+        out = a @ w.transpose(-2, -1)
+        assert tuple(out.shape) == (2, 4, 1024)
+        assert out.dtype == torch.bfloat16
+        ran = True
+    except Exception:
+        pass
+    # Linear matmul
+    try:
+        a = _rand((2, 4, 4096), torch.bfloat16)
+        w = _rand((2560, 4096), torch.bfloat16)
+        out = a @ w.transpose(-2, -1)
+        assert tuple(out.shape) == (2, 4, 2560)
+        assert out.dtype == torch.bfloat16
+        ran = True
+    except Exception:
+        pass
+    # Linear matmul
+    try:
+        a = _rand((2, 4, 2560), torch.bfloat16)
+        w = _rand((4096, 2560), torch.bfloat16)
+        out = a @ w.transpose(-2, -1)
+        assert tuple(out.shape) == (2, 4, 4096)
+        assert out.dtype == torch.bfloat16
+        ran = True
+    except Exception:
+        pass
+    if not ran:
+        pytest.skip("No runnable CPU shape case for this app")

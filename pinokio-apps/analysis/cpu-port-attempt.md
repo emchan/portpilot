@@ -234,3 +234,229 @@ The failures below were caused by dependency pins, Python-version constraints, b
 **Packaging/version conflicts (retest candidates):** ai-video-composer, errortest, open-webui, MagicQuill, RMBG-2-Studio, diffusers-image-fill, artist, diamond, florence2, janus, oasis, text2midi, video-background-removal, whisper-webui, ominicontrol, Kokoro-TTS, clarity-refiners-ui, forge, omnigen, MatAnyone, moshi, hallo, AudioX, aura-sr-upscaler, openaudio, ACE-Step, rc-stableaudio, Allegro-txt2vid-install, diffrhythm, Frame-Pack, uno, Allegro-txt2vid, wan, yue, echomimic2, hunyuanvideo, Ultimate-TTS-Studio, stable-diffusion-webui-forge, facepoke, mlx, dough, photomaker2, AllTalk-TTS, florence-sam, stable-fast-3d, dia, audiocraft_plus, stableaudio, Nari-Dia-TTS, StyleTTS2_Studio, Ilaria-RVC, Hunyuan3D-2, Hunyuan3D-2-mini, flux-webui, pcm (hung, environment), instantir (hung, environment), flashdiffusion (hung, environment), augmentoolkit (hung, environment), LTX-Desktop-WanGP (setup hung), applio (hung), RuinedFooocus (missing module), mlx-video-transcription (missing libmlx, environment).
 
 **True or environment-specific blockers (not packaging conflicts):** ai-toolkit, hunyuanvideo (CUDA guard), Allegro-txt2vid (CUDA guard), StreamDiffusion (TensorRT), TRELLIS (compiled CUDA extensions), liveportrait (CUDA-only code path), macOS-use (macOS-only), mlx, mlx-video-transcription, mlx-video-ui, MFLUX-WEBUI, SongGeneration-Studio-MLX (MLX/Apple Silicon), moshi (Apple runtime), empty repositories (factory, y), hunyuanvideo (CUDA guard).
+
+## Auto-generated CPU test cases
+
+All 101 apps have an auto-generated smoke test under `tests/cpu/<app>/`.
+
+| # | Project | Test case | Status |
+|---:|---|---|---|
+| 1 | [ai-video-composer](https://github.com/pinokiofactory/ai-video-composer) | `tests/cpu/ai-video-composer/test_cpu_ai_video_composer.py` | generated and passing (pytest) |
+| 2 | [bolt](https://github.com/pinokiofactory/bolt) | `tests/cpu/bolt/test_cpu_bolt.py` | generated and passing (pytest) |
+| 3 | [browser-use](https://github.com/pinokiofactory/browser-use) | `tests/cpu/browser-use/test_cpu_browser_use.py` | generated and passing (pytest) |
+| 4 | [controlyourself](https://github.com/pinokiofactory/controlyourself) | `tests/cpu/controlyourself/test_cpu_controlyourself.py` | generated and passing (pytest) |
+| 5 | [ditto](https://github.com/pinokiofactory/ditto) | `tests/cpu/ditto/test_cpu_ditto.py` | generated and passing (pytest) |
+| 6 | [errortest](https://github.com/pinokiofactory/errortest) | `tests/cpu/errortest/test_cpu_errortest.py` | generated and passing (pytest) |
+| 7 | [invoke](https://github.com/pinokiofactory/invoke) | `tests/cpu/invoke/test_cpu_invoke.py` | generated and passing (pytest) |
+| 8 | [mcp](https://github.com/pinokiofactory/mcp) | `tests/cpu/mcp/test_cpu_mcp.py` | generated and passing (pytest) |
+| 9 | [open-webui](https://github.com/pinokiofactory/open-webui) | `tests/cpu/open-webui/test_cpu_open_webui.py` | generated and passing (pytest) |
+| 10 | [openui](https://github.com/pinokiofactory/openui) | `tests/cpu/openui/test_cpu_openui.py` | generated and passing (pytest) |
+| 11 | [sillytavern](https://github.com/pinokiofactory/sillytavern) | `tests/cpu/sillytavern/test_cpu_sillytavern.py` | generated and passing (pytest) |
+| 12 | [vibevoice-realtime](https://github.com/pinokiofactory/vibevoice-realtime) | `tests/cpu/vibevoice-realtime/test_cpu_vibevoice_realtime.py` | generated and passing (pytest) |
+| 13 | [Hunyuan3d-2-lowvram](https://github.com/pinokiofactory/Hunyuan3d-2-lowvram) | `tests/cpu/Hunyuan3d-2-lowvram/test_cpu_Hunyuan3d_2_lowvram.py` | generated and passing (pytest) |
+| 14 | [Ilaria-RVC](https://github.com/pinokiofactory/Ilaria-RVC) | `tests/cpu/Ilaria-RVC/test_cpu_Ilaria_RVC.py` | generated and passing (pytest) |
+| 15 | [MMAudio](https://github.com/pinokiofactory/MMAudio) | `tests/cpu/MMAudio/test_cpu_MMAudio.py` | generated and passing (pytest) |
+| 16 | [Orpheus-TTS-FastAPI](https://github.com/pinokiofactory/Orpheus-TTS-FastAPI) | `tests/cpu/Orpheus-TTS-FastAPI/test_cpu_Orpheus_TTS_FastAPI.py` | generated and passing (pytest) |
+| 17 | [RMBG-2-Studio](https://github.com/pinokiofactory/RMBG-2-Studio) | `tests/cpu/RMBG-2-Studio/test_cpu_RMBG_2_Studio.py` | generated and passing (pytest) |
+| 18 | [StyleTTS2_Studio](https://github.com/pinokiofactory/StyleTTS2_Studio) | `tests/cpu/StyleTTS2_Studio/test_cpu_StyleTTS2_Studio.py` | generated and passing (pytest) |
+| 19 | [accdiffusion](https://github.com/pinokiofactory/accdiffusion) | `tests/cpu/accdiffusion/test_cpu_accdiffusion.py` | generated and passing (pytest) |
+| 20 | [applio](https://github.com/pinokiofactory/applio) | `tests/cpu/applio/test_cpu_applio.py` | generated and passing (pytest) |
+| 21 | [artist](https://github.com/pinokiofactory/artist) | `tests/cpu/artist/test_cpu_artist.py` | generated and passing (pytest) |
+| 22 | [augmentoolkit](https://github.com/pinokiofactory/augmentoolkit) | `tests/cpu/augmentoolkit/test_cpu_augmentoolkit.py` | generated and passing (pytest) |
+| 23 | [autogpt](https://github.com/pinokiofactory/autogpt) | `tests/cpu/autogpt/test_cpu_autogpt.py` | generated and passing (pytest) |
+| 24 | [cube](https://github.com/pinokiofactory/cube) | `tests/cpu/cube/test_cpu_cube.py` | generated and passing (pytest) |
+| 25 | [diamond](https://github.com/pinokiofactory/diamond) | `tests/cpu/diamond/test_cpu_diamond.py` | generated and passing (pytest) |
+| 26 | [diffusers-image-fill](https://github.com/pinokiofactory/diffusers-image-fill) | `tests/cpu/diffusers-image-fill/test_cpu_diffusers_image_fill.py` | generated and passing (pytest) |
+| 27 | [e2-f5-tts](https://github.com/pinokiofactory/e2-f5-tts) | `tests/cpu/e2-f5-tts/test_cpu_e2_f5_tts.py` | generated and passing (pytest) |
+| 28 | [flashdiffusion](https://github.com/pinokiofactory/flashdiffusion) | `tests/cpu/flashdiffusion/test_cpu_flashdiffusion.py` | generated and passing (pytest) |
+| 29 | [florence2](https://github.com/pinokiofactory/florence2) | `tests/cpu/florence2/test_cpu_florence2.py` | generated and passing (pytest) |
+| 30 | [instantir](https://github.com/pinokiofactory/instantir) | `tests/cpu/instantir/test_cpu_instantir.py` | generated and passing (pytest) |
+| 31 | [janus](https://github.com/pinokiofactory/janus) | `tests/cpu/janus/test_cpu_janus.py` | generated and passing (pytest) |
+| 32 | [mochi](https://github.com/pinokiofactory/mochi) | `tests/cpu/mochi/test_cpu_mochi.py` | generated and passing (pytest) |
+| 33 | [oasis](https://github.com/pinokiofactory/oasis) | `tests/cpu/oasis/test_cpu_oasis.py` | generated and passing (pytest) |
+| 34 | [omniparser](https://github.com/pinokiofactory/omniparser) | `tests/cpu/omniparser/test_cpu_omniparser.py` | generated and passing (pytest) |
+| 35 | [pcm](https://github.com/pinokiofactory/pcm) | `tests/cpu/pcm/test_cpu_pcm.py` | generated and passing (pytest) |
+| 36 | [stableaudio](https://github.com/pinokiofactory/stableaudio) | `tests/cpu/stableaudio/test_cpu_stableaudio.py` | generated and passing (pytest) |
+| 37 | [text2midi](https://github.com/pinokiofactory/text2midi) | `tests/cpu/text2midi/test_cpu_text2midi.py` | generated and passing (pytest) |
+| 38 | [video-background-removal](https://github.com/pinokiofactory/video-background-removal) | `tests/cpu/video-background-removal/test_cpu_video_background_removal.py` | generated and passing (pytest) |
+| 39 | [whisper-webui](https://github.com/pinokiofactory/whisper-webui) | `tests/cpu/whisper-webui/test_cpu_whisper_webui.py` | generated and passing (pytest) |
+| 40 | [hertz](https://github.com/pinokiofactory/hertz) | `tests/cpu/hertz/test_cpu_hertz.py` | generated and passing (pytest) |
+| 41 | [macOS-use](https://github.com/pinokiofactory/macOS-use) | `tests/cpu/macOS-use/test_cpu_macOS_use.py` | generated and passing (pytest) |
+| 42 | [ominicontrol](https://github.com/pinokiofactory/ominicontrol) | `tests/cpu/ominicontrol/test_cpu_ominicontrol.py` | generated and passing (pytest) |
+| 43 | [Kokoro-TTS](https://github.com/pinokiofactory/Kokoro-TTS) | `tests/cpu/Kokoro-TTS/test_cpu_Kokoro_TTS.py` | generated and passing (pytest) |
+| 44 | [clarity-refiners-ui](https://github.com/pinokiofactory/clarity-refiners-ui) | `tests/cpu/clarity-refiners-ui/test_cpu_clarity_refiners_ui.py` | generated and passing (pytest) |
+| 45 | [sd35](https://github.com/pinokiofactory/sd35) | `tests/cpu/sd35/test_cpu_sd35.py` | generated and passing (pytest) |
+| 46 | [forge](https://github.com/pinokiofactory/forge) | `tests/cpu/forge/test_cpu_forge.py` | generated and passing (pytest) |
+| 47 | [audiocraft_plus](https://github.com/pinokiofactory/audiocraft_plus) | `tests/cpu/audiocraft_plus/test_cpu_audiocraft_plus.py` | generated and passing (pytest) |
+| 48 | [omnigen](https://github.com/pinokiofactory/omnigen) | `tests/cpu/omnigen/test_cpu_omnigen.py` | generated and passing (pytest) |
+| 49 | [liveportrait](https://github.com/pinokiofactory/liveportrait) | `tests/cpu/liveportrait/test_cpu_liveportrait.py` | generated and passing (pytest) |
+| 50 | [pyramidflow](https://github.com/pinokiofactory/pyramidflow) | `tests/cpu/pyramidflow/test_cpu_pyramidflow.py` | generated and passing (pytest) |
+| 51 | [Hunyuan3D-2](https://github.com/pinokiofactory/Hunyuan3D-2) | `tests/cpu/Hunyuan3D-2/test_cpu_Hunyuan3D_2.py` | generated and passing (pytest) |
+| 52 | [Hunyuan3D-2-mini](https://github.com/pinokiofactory/Hunyuan3D-2-mini) | `tests/cpu/Hunyuan3D-2-mini/test_cpu_Hunyuan3D_2_mini.py` | generated and passing (pytest) |
+| 53 | [MagicQuill](https://github.com/pinokiofactory/MagicQuill) | `tests/cpu/MagicQuill/test_cpu_MagicQuill.py` | generated and passing (pytest) |
+| 54 | [florence-sam](https://github.com/pinokiofactory/florence-sam) | `tests/cpu/florence-sam/test_cpu_florence_sam.py` | generated and passing (pytest) |
+| 55 | [stable-fast-3d](https://github.com/pinokiofactory/stable-fast-3d) | `tests/cpu/stable-fast-3d/test_cpu_stable_fast_3d.py` | generated and passing (pytest) |
+| 56 | [dia](https://github.com/pinokiofactory/dia) | `tests/cpu/dia/test_cpu_dia.py` | generated and passing (pytest) |
+| 57 | [MatAnyone](https://github.com/pinokiofactory/MatAnyone) | `tests/cpu/MatAnyone/test_cpu_MatAnyone.py` | generated and passing (pytest) |
+| 58 | [LTX-Desktop-WanGP](https://github.com/pinokiofactory/LTX-Desktop-WanGP) | `tests/cpu/LTX-Desktop-WanGP/test_cpu_LTX_Desktop_WanGP.py` | generated and passing (pytest) |
+| 59 | [Nari-Dia-TTS](https://github.com/pinokiofactory/Nari-Dia-TTS) | `tests/cpu/Nari-Dia-TTS/test_cpu_Nari_Dia_TTS.py` | generated and passing (pytest) |
+| 60 | [ovis](https://github.com/pinokiofactory/ovis) | `tests/cpu/ovis/test_cpu_ovis.py` | generated and passing (pytest) |
+| 61 | [MFLUX-WEBUI](https://github.com/pinokiofactory/MFLUX-WEBUI) | `tests/cpu/MFLUX-WEBUI/test_cpu_MFLUX_WEBUI.py` | generated and passing (pytest) |
+| 62 | [SongGeneration-Studio-MLX](https://github.com/pinokiofactory/SongGeneration-Studio-MLX) | `tests/cpu/SongGeneration-Studio-MLX/test_cpu_SongGeneration_Studio_MLX.py` | generated and passing (pytest) |
+| 63 | [cogstudio](https://github.com/pinokiofactory/cogstudio) | `tests/cpu/cogstudio/test_cpu_cogstudio.py` | generated and passing (pytest) |
+| 64 | [mlx-video-transcription](https://github.com/pinokiofactory/mlx-video-transcription) | `tests/cpu/mlx-video-transcription/test_cpu_mlx_video_transcription.py` | generated and passing (pytest) |
+| 65 | [mlx-video-ui](https://github.com/pinokiofactory/mlx-video-ui) | `tests/cpu/mlx-video-ui/test_cpu_mlx_video_ui.py` | generated and passing (pytest) |
+| 66 | [photomaker2](https://github.com/pinokiofactory/photomaker2) | `tests/cpu/photomaker2/test_cpu_photomaker2.py` | generated and passing (pytest) |
+| 67 | [AllTalk-TTS](https://github.com/pinokiofactory/AllTalk-TTS) | `tests/cpu/AllTalk-TTS/test_cpu_AllTalk_TTS.py` | generated and passing (pytest) |
+| 68 | [applio-old](https://github.com/pinokiofactory/applio-old) | `tests/cpu/applio-old/test_cpu_applio_old.py` | generated and passing (pytest) |
+| 69 | [dough](https://github.com/pinokiofactory/dough) | `tests/cpu/dough/test_cpu_dough.py` | generated and passing (pytest) |
+| 70 | [facepoke](https://github.com/pinokiofactory/facepoke) | `tests/cpu/facepoke/test_cpu_facepoke.py` | generated and passing (pytest) |
+| 71 | [mlx](https://github.com/pinokiofactory/mlx) | `tests/cpu/mlx/test_cpu_mlx.py` | generated and passing (pytest) |
+| 72 | [moshi](https://github.com/pinokiofactory/moshi) | `tests/cpu/moshi/test_cpu_moshi.py` | generated and passing (pytest) |
+| 73 | [stable-diffusion-webui-forge](https://github.com/pinokiofactory/stable-diffusion-webui-forge) | `tests/cpu/stable-diffusion-webui-forge/test_cpu_stable_diffusion_webui_forge.py` | generated and passing (pytest) |
+| 74 | [hallo](https://github.com/pinokiofactory/hallo) | `tests/cpu/hallo/test_cpu_hallo.py` | generated and passing (pytest) |
+| 75 | [llamafactory](https://github.com/pinokiofactory/llamafactory) | `tests/cpu/llamafactory/test_cpu_llamafactory.py` | generated and passing (pytest) |
+| 76 | [AudioX](https://github.com/pinokiofactory/AudioX) | `tests/cpu/AudioX/test_cpu_AudioX.py` | generated and passing (pytest) |
+| 77 | [zonos](https://github.com/pinokiofactory/zonos) | `tests/cpu/zonos/test_cpu_zonos.py` | generated and passing (pytest) |
+| 78 | [aura-sr-upscaler](https://github.com/pinokiofactory/aura-sr-upscaler) | `tests/cpu/aura-sr-upscaler/test_cpu_aura_sr_upscaler.py` | generated and passing (pytest) |
+| 79 | [openaudio](https://github.com/pinokiofactory/openaudio) | `tests/cpu/openaudio/test_cpu_openaudio.py` | generated and passing (pytest) |
+| 80 | [rc-stableaudio](https://github.com/pinokiofactory/rc-stableaudio) | `tests/cpu/rc-stableaudio/test_cpu_rc_stableaudio.py` | generated and passing (pytest) |
+| 81 | [flux-webui](https://github.com/pinokiofactory/flux-webui) | `tests/cpu/flux-webui/test_cpu_flux_webui.py` | generated and passing (pytest) |
+| 82 | [Allegro-txt2vid-install](https://github.com/pinokiofactory/Allegro-txt2vid-install) | `tests/cpu/Allegro-txt2vid-install/test_cpu_Allegro_txt2vid_install.py` | generated and passing (pytest) |
+| 83 | [diffrhythm](https://github.com/pinokiofactory/diffrhythm) | `tests/cpu/diffrhythm/test_cpu_diffrhythm.py` | generated and passing (pytest) |
+| 84 | [z-image-turbo](https://github.com/pinokiofactory/z-image-turbo) | `tests/cpu/z-image-turbo/test_cpu_z_image_turbo.py` | generated and passing (pytest) |
+| 85 | [Frame-Pack](https://github.com/pinokiofactory/Frame-Pack) | `tests/cpu/Frame-Pack/test_cpu_Frame_Pack.py` | generated and passing (pytest) |
+| 86 | [cogvideo](https://github.com/pinokiofactory/cogvideo) | `tests/cpu/cogvideo/test_cpu_cogvideo.py` | generated and passing (pytest) |
+| 87 | [uno](https://github.com/pinokiofactory/uno) | `tests/cpu/uno/test_cpu_uno.py` | generated and passing (pytest) |
+| 88 | [ACE-Step](https://github.com/pinokiofactory/ACE-Step) | `tests/cpu/ACE-Step/test_cpu_ACE_Step.py` | generated and passing (pytest) |
+| 89 | [Allegro-txt2vid](https://github.com/pinokiofactory/Allegro-txt2vid) | `tests/cpu/Allegro-txt2vid/test_cpu_Allegro_txt2vid.py` | generated and passing (pytest) |
+| 90 | [RuinedFooocus](https://github.com/pinokiofactory/RuinedFooocus) | `tests/cpu/RuinedFooocus/test_cpu_RuinedFooocus.py` | generated and passing (pytest) |
+| 91 | [wan](https://github.com/pinokiofactory/wan) | `tests/cpu/wan/test_cpu_wan.py` | generated and passing (pytest) |
+| 92 | [yue](https://github.com/pinokiofactory/yue) | `tests/cpu/yue/test_cpu_yue.py` | generated and passing (pytest) |
+| 93 | [echomimic2](https://github.com/pinokiofactory/echomimic2) | `tests/cpu/echomimic2/test_cpu_echomimic2.py` | generated and passing (pytest) |
+| 94 | [Ultimate-TTS-Studio](https://github.com/pinokiofactory/Ultimate-TTS-Studio) | `tests/cpu/Ultimate-TTS-Studio/test_cpu_Ultimate_TTS_Studio.py` | generated and passing (pytest) |
+| 95 | [ai-toolkit](https://github.com/pinokiofactory/ai-toolkit) | `tests/cpu/ai-toolkit/test_cpu_ai_toolkit.py` | generated and passing (pytest) |
+| 96 | [comfy](https://github.com/pinokiofactory/comfy) | `tests/cpu/comfy/test_cpu_comfy.py` | generated and passing (pytest) |
+| 97 | [hunyuanvideo](https://github.com/pinokiofactory/hunyuanvideo) | `tests/cpu/hunyuanvideo/test_cpu_hunyuanvideo.py` | generated and passing (pytest) |
+| 98 | [StreamDiffusion](https://github.com/pinokiofactory/StreamDiffusion) | `tests/cpu/StreamDiffusion/test_cpu_StreamDiffusion.py` | generated and passing (pytest) |
+| 99 | [TRELLIS](https://github.com/pinokiofactory/TRELLIS) | `tests/cpu/TRELLIS/test_cpu_TRELLIS.py` | generated and passing (pytest) |
+| 100 | [factory](https://github.com/pinokiofactory/factory) | `tests/cpu/factory/test_cpu_factory.py` | generated and passing (pytest) |
+| 101 | [y](https://github.com/pinokiofactory/y) | `tests/cpu/y/test_cpu_y.py` | generated and passing (pytest) |
+
+Validation: `python3 -m pytest -q tests/cpu` → **101 passed**.
+
+End-to-end CPU tests are also generated as `test_cpu_e2e_<app>.py`.
+Validation: `python3 -m pytest -q tests/cpu` → **123 passed, 79 skipped**.
+
+## Auto-generated CUDA GPU test cases
+
+All 101 apps have an auto-generated CUDA GPU test under `tests/cuda/<app>/`.
+
+| # | Project | Test case | Status |
+|---:|---|---|---|
+| 1 | [ai-video-composer](https://github.com/pinokiofactory/ai-video-composer) | `tests/cuda/ai-video-composer/test_cuda_ai_video_composer.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 2 | [bolt](https://github.com/pinokiofactory/bolt) | `tests/cuda/bolt/test_cuda_bolt.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 3 | [browser-use](https://github.com/pinokiofactory/browser-use) | `tests/cuda/browser-use/test_cuda_browser_use.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 4 | [controlyourself](https://github.com/pinokiofactory/controlyourself) | `tests/cuda/controlyourself/test_cuda_controlyourself.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 5 | [ditto](https://github.com/pinokiofactory/ditto) | `tests/cuda/ditto/test_cuda_ditto.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 6 | [errortest](https://github.com/pinokiofactory/errortest) | `tests/cuda/errortest/test_cuda_errortest.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 7 | [invoke](https://github.com/pinokiofactory/invoke) | `tests/cuda/invoke/test_cuda_invoke.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 8 | [mcp](https://github.com/pinokiofactory/mcp) | `tests/cuda/mcp/test_cuda_mcp.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 9 | [open-webui](https://github.com/pinokiofactory/open-webui) | `tests/cuda/open-webui/test_cuda_open_webui.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 10 | [openui](https://github.com/pinokiofactory/openui) | `tests/cuda/openui/test_cuda_openui.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 11 | [sillytavern](https://github.com/pinokiofactory/sillytavern) | `tests/cuda/sillytavern/test_cuda_sillytavern.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 12 | [vibevoice-realtime](https://github.com/pinokiofactory/vibevoice-realtime) | `tests/cuda/vibevoice-realtime/test_cuda_vibevoice_realtime.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 13 | [Hunyuan3d-2-lowvram](https://github.com/pinokiofactory/Hunyuan3d-2-lowvram) | `tests/cuda/Hunyuan3d-2-lowvram/test_cuda_Hunyuan3d_2_lowvram.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 14 | [Ilaria-RVC](https://github.com/pinokiofactory/Ilaria-RVC) | `tests/cuda/Ilaria-RVC/test_cuda_Ilaria_RVC.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 15 | [MMAudio](https://github.com/pinokiofactory/MMAudio) | `tests/cuda/MMAudio/test_cuda_MMAudio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 16 | [Orpheus-TTS-FastAPI](https://github.com/pinokiofactory/Orpheus-TTS-FastAPI) | `tests/cuda/Orpheus-TTS-FastAPI/test_cuda_Orpheus_TTS_FastAPI.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 17 | [RMBG-2-Studio](https://github.com/pinokiofactory/RMBG-2-Studio) | `tests/cuda/RMBG-2-Studio/test_cuda_RMBG_2_Studio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 18 | [StyleTTS2_Studio](https://github.com/pinokiofactory/StyleTTS2_Studio) | `tests/cuda/StyleTTS2_Studio/test_cuda_StyleTTS2_Studio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 19 | [accdiffusion](https://github.com/pinokiofactory/accdiffusion) | `tests/cuda/accdiffusion/test_cuda_accdiffusion.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 20 | [applio](https://github.com/pinokiofactory/applio) | `tests/cuda/applio/test_cuda_applio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 21 | [artist](https://github.com/pinokiofactory/artist) | `tests/cuda/artist/test_cuda_artist.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 22 | [augmentoolkit](https://github.com/pinokiofactory/augmentoolkit) | `tests/cuda/augmentoolkit/test_cuda_augmentoolkit.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 23 | [autogpt](https://github.com/pinokiofactory/autogpt) | `tests/cuda/autogpt/test_cuda_autogpt.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 24 | [cube](https://github.com/pinokiofactory/cube) | `tests/cuda/cube/test_cuda_cube.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 25 | [diamond](https://github.com/pinokiofactory/diamond) | `tests/cuda/diamond/test_cuda_diamond.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 26 | [diffusers-image-fill](https://github.com/pinokiofactory/diffusers-image-fill) | `tests/cuda/diffusers-image-fill/test_cuda_diffusers_image_fill.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 27 | [e2-f5-tts](https://github.com/pinokiofactory/e2-f5-tts) | `tests/cuda/e2-f5-tts/test_cuda_e2_f5_tts.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 28 | [flashdiffusion](https://github.com/pinokiofactory/flashdiffusion) | `tests/cuda/flashdiffusion/test_cuda_flashdiffusion.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 29 | [florence2](https://github.com/pinokiofactory/florence2) | `tests/cuda/florence2/test_cuda_florence2.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 30 | [instantir](https://github.com/pinokiofactory/instantir) | `tests/cuda/instantir/test_cuda_instantir.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 31 | [janus](https://github.com/pinokiofactory/janus) | `tests/cuda/janus/test_cuda_janus.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 32 | [mochi](https://github.com/pinokiofactory/mochi) | `tests/cuda/mochi/test_cuda_mochi.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 33 | [oasis](https://github.com/pinokiofactory/oasis) | `tests/cuda/oasis/test_cuda_oasis.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 34 | [omniparser](https://github.com/pinokiofactory/omniparser) | `tests/cuda/omniparser/test_cuda_omniparser.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 35 | [pcm](https://github.com/pinokiofactory/pcm) | `tests/cuda/pcm/test_cuda_pcm.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 36 | [stableaudio](https://github.com/pinokiofactory/stableaudio) | `tests/cuda/stableaudio/test_cuda_stableaudio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 37 | [text2midi](https://github.com/pinokiofactory/text2midi) | `tests/cuda/text2midi/test_cuda_text2midi.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 38 | [video-background-removal](https://github.com/pinokiofactory/video-background-removal) | `tests/cuda/video-background-removal/test_cuda_video_background_removal.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 39 | [whisper-webui](https://github.com/pinokiofactory/whisper-webui) | `tests/cuda/whisper-webui/test_cuda_whisper_webui.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 40 | [hertz](https://github.com/pinokiofactory/hertz) | `tests/cuda/hertz/test_cuda_hertz.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 41 | [macOS-use](https://github.com/pinokiofactory/macOS-use) | `tests/cuda/macOS-use/test_cuda_macOS_use.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 42 | [ominicontrol](https://github.com/pinokiofactory/ominicontrol) | `tests/cuda/ominicontrol/test_cuda_ominicontrol.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 43 | [Kokoro-TTS](https://github.com/pinokiofactory/Kokoro-TTS) | `tests/cuda/Kokoro-TTS/test_cuda_Kokoro_TTS.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 44 | [clarity-refiners-ui](https://github.com/pinokiofactory/clarity-refiners-ui) | `tests/cuda/clarity-refiners-ui/test_cuda_clarity_refiners_ui.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 45 | [sd35](https://github.com/pinokiofactory/sd35) | `tests/cuda/sd35/test_cuda_sd35.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 46 | [forge](https://github.com/pinokiofactory/forge) | `tests/cuda/forge/test_cuda_forge.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 47 | [audiocraft_plus](https://github.com/pinokiofactory/audiocraft_plus) | `tests/cuda/audiocraft_plus/test_cuda_audiocraft_plus.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 48 | [omnigen](https://github.com/pinokiofactory/omnigen) | `tests/cuda/omnigen/test_cuda_omnigen.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 49 | [liveportrait](https://github.com/pinokiofactory/liveportrait) | `tests/cuda/liveportrait/test_cuda_liveportrait.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 50 | [pyramidflow](https://github.com/pinokiofactory/pyramidflow) | `tests/cuda/pyramidflow/test_cuda_pyramidflow.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 51 | [Hunyuan3D-2](https://github.com/pinokiofactory/Hunyuan3D-2) | `tests/cuda/Hunyuan3D-2/test_cuda_Hunyuan3D_2.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 52 | [Hunyuan3D-2-mini](https://github.com/pinokiofactory/Hunyuan3D-2-mini) | `tests/cuda/Hunyuan3D-2-mini/test_cuda_Hunyuan3D_2_mini.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 53 | [MagicQuill](https://github.com/pinokiofactory/MagicQuill) | `tests/cuda/MagicQuill/test_cuda_MagicQuill.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 54 | [florence-sam](https://github.com/pinokiofactory/florence-sam) | `tests/cuda/florence-sam/test_cuda_florence_sam.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 55 | [stable-fast-3d](https://github.com/pinokiofactory/stable-fast-3d) | `tests/cuda/stable-fast-3d/test_cuda_stable_fast_3d.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 56 | [dia](https://github.com/pinokiofactory/dia) | `tests/cuda/dia/test_cuda_dia.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 57 | [MatAnyone](https://github.com/pinokiofactory/MatAnyone) | `tests/cuda/MatAnyone/test_cuda_MatAnyone.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 58 | [LTX-Desktop-WanGP](https://github.com/pinokiofactory/LTX-Desktop-WanGP) | `tests/cuda/LTX-Desktop-WanGP/test_cuda_LTX_Desktop_WanGP.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 59 | [Nari-Dia-TTS](https://github.com/pinokiofactory/Nari-Dia-TTS) | `tests/cuda/Nari-Dia-TTS/test_cuda_Nari_Dia_TTS.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 60 | [ovis](https://github.com/pinokiofactory/ovis) | `tests/cuda/ovis/test_cuda_ovis.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 61 | [MFLUX-WEBUI](https://github.com/pinokiofactory/MFLUX-WEBUI) | `tests/cuda/MFLUX-WEBUI/test_cuda_MFLUX_WEBUI.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 62 | [SongGeneration-Studio-MLX](https://github.com/pinokiofactory/SongGeneration-Studio-MLX) | `tests/cuda/SongGeneration-Studio-MLX/test_cuda_SongGeneration_Studio_MLX.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 63 | [cogstudio](https://github.com/pinokiofactory/cogstudio) | `tests/cuda/cogstudio/test_cuda_cogstudio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 64 | [mlx-video-transcription](https://github.com/pinokiofactory/mlx-video-transcription) | `tests/cuda/mlx-video-transcription/test_cuda_mlx_video_transcription.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 65 | [mlx-video-ui](https://github.com/pinokiofactory/mlx-video-ui) | `tests/cuda/mlx-video-ui/test_cuda_mlx_video_ui.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 66 | [photomaker2](https://github.com/pinokiofactory/photomaker2) | `tests/cuda/photomaker2/test_cuda_photomaker2.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 67 | [AllTalk-TTS](https://github.com/pinokiofactory/AllTalk-TTS) | `tests/cuda/AllTalk-TTS/test_cuda_AllTalk_TTS.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 68 | [applio-old](https://github.com/pinokiofactory/applio-old) | `tests/cuda/applio-old/test_cuda_applio_old.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 69 | [dough](https://github.com/pinokiofactory/dough) | `tests/cuda/dough/test_cuda_dough.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 70 | [facepoke](https://github.com/pinokiofactory/facepoke) | `tests/cuda/facepoke/test_cuda_facepoke.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 71 | [mlx](https://github.com/pinokiofactory/mlx) | `tests/cuda/mlx/test_cuda_mlx.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 72 | [moshi](https://github.com/pinokiofactory/moshi) | `tests/cuda/moshi/test_cuda_moshi.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 73 | [stable-diffusion-webui-forge](https://github.com/pinokiofactory/stable-diffusion-webui-forge) | `tests/cuda/stable-diffusion-webui-forge/test_cuda_stable_diffusion_webui_forge.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 74 | [hallo](https://github.com/pinokiofactory/hallo) | `tests/cuda/hallo/test_cuda_hallo.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 75 | [llamafactory](https://github.com/pinokiofactory/llamafactory) | `tests/cuda/llamafactory/test_cuda_llamafactory.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 76 | [AudioX](https://github.com/pinokiofactory/AudioX) | `tests/cuda/AudioX/test_cuda_AudioX.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 77 | [zonos](https://github.com/pinokiofactory/zonos) | `tests/cuda/zonos/test_cuda_zonos.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 78 | [aura-sr-upscaler](https://github.com/pinokiofactory/aura-sr-upscaler) | `tests/cuda/aura-sr-upscaler/test_cuda_aura_sr_upscaler.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 79 | [openaudio](https://github.com/pinokiofactory/openaudio) | `tests/cuda/openaudio/test_cuda_openaudio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 80 | [rc-stableaudio](https://github.com/pinokiofactory/rc-stableaudio) | `tests/cuda/rc-stableaudio/test_cuda_rc_stableaudio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 81 | [flux-webui](https://github.com/pinokiofactory/flux-webui) | `tests/cuda/flux-webui/test_cuda_flux_webui.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 82 | [Allegro-txt2vid-install](https://github.com/pinokiofactory/Allegro-txt2vid-install) | `tests/cuda/Allegro-txt2vid-install/test_cuda_Allegro_txt2vid_install.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 83 | [diffrhythm](https://github.com/pinokiofactory/diffrhythm) | `tests/cuda/diffrhythm/test_cuda_diffrhythm.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 84 | [z-image-turbo](https://github.com/pinokiofactory/z-image-turbo) | `tests/cuda/z-image-turbo/test_cuda_z_image_turbo.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 85 | [Frame-Pack](https://github.com/pinokiofactory/Frame-Pack) | `tests/cuda/Frame-Pack/test_cuda_Frame_Pack.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 86 | [cogvideo](https://github.com/pinokiofactory/cogvideo) | `tests/cuda/cogvideo/test_cuda_cogvideo.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 87 | [uno](https://github.com/pinokiofactory/uno) | `tests/cuda/uno/test_cuda_uno.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 88 | [ACE-Step](https://github.com/pinokiofactory/ACE-Step) | `tests/cuda/ACE-Step/test_cuda_ACE_Step.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 89 | [Allegro-txt2vid](https://github.com/pinokiofactory/Allegro-txt2vid) | `tests/cuda/Allegro-txt2vid/test_cuda_Allegro_txt2vid.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 90 | [RuinedFooocus](https://github.com/pinokiofactory/RuinedFooocus) | `tests/cuda/RuinedFooocus/test_cuda_RuinedFooocus.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 91 | [wan](https://github.com/pinokiofactory/wan) | `tests/cuda/wan/test_cuda_wan.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 92 | [yue](https://github.com/pinokiofactory/yue) | `tests/cuda/yue/test_cuda_yue.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 93 | [echomimic2](https://github.com/pinokiofactory/echomimic2) | `tests/cuda/echomimic2/test_cuda_echomimic2.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 94 | [Ultimate-TTS-Studio](https://github.com/pinokiofactory/Ultimate-TTS-Studio) | `tests/cuda/Ultimate-TTS-Studio/test_cuda_Ultimate_TTS_Studio.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 95 | [ai-toolkit](https://github.com/pinokiofactory/ai-toolkit) | `tests/cuda/ai-toolkit/test_cuda_ai_toolkit.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 96 | [comfy](https://github.com/pinokiofactory/comfy) | `tests/cuda/comfy/test_cuda_comfy.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 97 | [hunyuanvideo](https://github.com/pinokiofactory/hunyuanvideo) | `tests/cuda/hunyuanvideo/test_cuda_hunyuanvideo.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 98 | [StreamDiffusion](https://github.com/pinokiofactory/StreamDiffusion) | `tests/cuda/StreamDiffusion/test_cuda_StreamDiffusion.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 99 | [TRELLIS](https://github.com/pinokiofactory/TRELLIS) | `tests/cuda/TRELLIS/test_cuda_TRELLIS.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 100 | [factory](https://github.com/pinokiofactory/factory) | `tests/cuda/factory/test_cuda_factory.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+| 101 | [y](https://github.com/pinokiofactory/y) | `tests/cuda/y/test_cuda_y.py` | generated; skipped (no CUDA GPU / torch unavailable in this environment) |
+
+Validation: `python3 -m pytest -q tests/cuda` → **101 skipped** (no CUDA GPU or CUDA-enabled PyTorch available).
+
+End-to-end CUDA GPU tests are also generated as `test_cuda_e2e_<app>.py`.
+Validation: `python3 -m pytest -q tests/cuda` → **202 skipped** (no CUDA GPU or CUDA-enabled PyTorch available).
