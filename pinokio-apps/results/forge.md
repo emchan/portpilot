@@ -27,14 +27,5 @@ No package dependencies were declared in the repository. Installers that only ru
 
 ## CPU test run (2026-11-21)
 
-- blocked by numpy build failure on Python 3.14.
+- retested on Python 3.12; tokenizers build failure.
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #46 of 101 (by porting effort, easiest first).
-- **Status:** Needs launcher change.
-- **Changes applied / required:** add a CPU wheel branch / remove GPU-only wheel pins; tune oneDNN/MKL threads for FP16/BF16 GEMMs.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** no CPU/AMD launcher branch.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

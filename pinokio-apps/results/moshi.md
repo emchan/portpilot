@@ -31,14 +31,5 @@ Wheel indexes referenced: cpu, cu121, nightly, rocm6.0.
 
 ## CPU test run (2026-11-21)
 
-- blocked by numpy build failure on Python 3.14.
+- retested on Python 3.12; moshi package blocked by numpy build failure.
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #72 of 101 (by porting effort, easiest first).
-- **Status:** Blocked (Apple-only).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** Apple-silicon-only MLX runtime; GPU-only attention: xformers.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

@@ -29,14 +29,5 @@ Wheel indexes referenced: cu118.
 
 ## CPU test run (2026-11-21)
 
-- blocked by Python 3.14-incompatible pinned requirements (numpy 1.24.4, Pillow 9.4.0, streamlit 1.27.0).
+- retested on Python 3.10; import app.py failed with botocore NoCredentialsError (AWS credentials missing).
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #69 of 101 (by porting effort, easiest first).
-- **Status:** Needs launcher change.
-- **Changes applied / required:** add a CPU wheel branch / remove GPU-only wheel pins; replace CUDA-only torch wheel with CPU wheel.
-- **Smoke check:** pass (1/1 files).
-- **Blockers:** no CPU/AMD launcher branch; CUDA-only torch wheel.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

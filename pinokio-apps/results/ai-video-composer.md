@@ -27,14 +27,5 @@ huggingface-hub, pydantic
 
 ## CPU test run (2026-11-21)
 
-- Downloaded upstream HF space; install failed on building pillow<11 for gradio 5.0.0 on Python 3.14. With newer gradio/moviepy, import hung.
-- Result: **not runnable in this container without dependency/version adjustments.**
-
-## CPU port attempt
-
-- **Attempt order:** #1 of 101 (by porting effort, easiest first).
-- **Status:** CPU-ready (no changes).
-- **Changes applied / required:** no change required (no local GEMM workload); add a CPU wheel branch / remove GPU-only wheel pins.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** none identified.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+- Installed on Python 3.12 with huggingface_hub==0.25.2; Gradio server launched on CPU (proxy/share limitation only).
+- Result: **CPU port works with dependency/version fixes.**

@@ -30,14 +30,5 @@ Wheel indexes referenced: cu128.
 
 ## CPU test run (2026-11-21)
 
-- blocked by numpy build failure on Python 3.14.
+- retested on Python 3.10; runtime still calls torch.cuda.current_device() and is not CPU-compatible.
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #73 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing non-GPU launcher route; replace CUDA-only torch wheel with CPU wheel; upcast 817 FP8 GEMMs to BF16/FP32; dequantize 626 packed 4-bit weights; tune oneDNN/MKL threads for FP16/BF16 GEMMs.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** CUDA-only torch wheel; 817 FP8 GEMMs; 626 packed 4-bit weights.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

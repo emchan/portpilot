@@ -30,14 +30,5 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 
 ## CPU test run (2026-11-21)
 
-- Install completed but runtime blocked by gradio/huggingface_hub HfFolder incompatibility.
+- retested on Python 3.12; blocked by gradio/huggingface_hub HfFolder incompatibility.
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #53 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; substitute GPU-only attention libs with SDPA math backend; remove bitsandbytes/torchao GPU quantisers or switch to GGUF; tune oneDNN/MKL threads for FP16/BF16 GEMMs.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** GPU-only attention: xformers; GPU quantisers: bitsandbytes.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

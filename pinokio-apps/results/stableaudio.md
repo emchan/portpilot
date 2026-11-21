@@ -30,14 +30,5 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 
 ## CPU test run (2026-11-21)
 
-- blocked by setuptools/pkg_resources/pandas build on Python 3.14.
+- retested on Python 3.10; stable_audio_tools imported, but run_gradio fails on torchvision::nms operator mismatch.
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #36 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; rely on devicetorch (already present); substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** GPU-only attention: xformers.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

@@ -27,14 +27,5 @@ itsdangerous, onnxruntime, open-webui
 
 ## CPU test run (2026-11-21)
 
-- open-webui requires Python <3.13; cannot install on this Python 3.14 container.
-- Result: **static/environment-limited verification only.**
-
-## CPU port attempt
-
-- **Attempt order:** #9 of 101 (by porting effort, easiest first).
-- **Status:** CPU-ready (no changes).
-- **Changes applied / required:** no change required (no local GEMM workload); add a CPU wheel branch / remove GPU-only wheel pins.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** none identified.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+- retested on Python 3.12; open-webui installation hung/timed out in this container.
+- Result: **not runnable in this container.**

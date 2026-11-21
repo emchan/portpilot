@@ -34,14 +34,5 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 
 ## CPU test run (2026-11-21)
 
-- blocked by diffq build failure (no gcc) on Python 3.14.
-- Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #74 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; rely on devicetorch (already present); substitute GPU-only attention libs with SDPA math backend; remove bitsandbytes/torchao GPU quantisers or switch to GGUF.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** GPU-only attention: xformers; GPU quantisers: bitsandbytes.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+- retested on Python 3.10 with gcc; dependencies installed and hallo imported successfully on CPU.
+- Result: **CPU port imports successfully.**

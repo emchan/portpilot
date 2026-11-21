@@ -4,12 +4,12 @@ Companion to [`results/pinokio-apps.md`](../results/pinokio-apps.md), [`cpu.md`]
 
 | # | Project | Commit | Status | Smoke check | Blockers |
 |---:|---|---|---|---|---|
-| 1 | [ai-video-composer](https://github.com/pinokiofactory/ai-video-composer) | [0cc7921](https://github.com/pinokiofactory/ai-video-composer/commit/0cc7921ff899b4d8ce6e5b8f419f9144e50fa43d) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
+| 1 | [ai-video-composer](https://github.com/pinokiofactory/ai-video-composer) | [0cc7921](https://github.com/pinokiofactory/ai-video-composer/commit/0cc7921ff899b4d8ce6e5b8f419f9144e50fa43d) | CPU-tested: passed (packaging fix) | n/a (no Python source in snapshot) | none identified |
 | 2 | [bolt](https://github.com/pinokiofactory/bolt) | [e78682b](https://github.com/pinokiofactory/bolt/commit/e78682b26d423a3e26fe8c120521eddb6411d78b) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
 | 3 | [browser-use](https://github.com/pinokiofactory/browser-use) | [6167ae0](https://github.com/pinokiofactory/browser-use/commit/6167ae0fc0dfd49120d215a4962143a87fd14c98) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
 | 4 | [controlyourself](https://github.com/pinokiofactory/controlyourself) | [e516690](https://github.com/pinokiofactory/controlyourself/commit/e516690406e0e8499b09c7e8a4c65ac13539099f) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
 | 5 | [ditto](https://github.com/pinokiofactory/ditto) | [aa45279](https://github.com/pinokiofactory/ditto/commit/aa45279201a7ddaead5ac33d56feba35417319c5) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
-| 6 | [errortest](https://github.com/pinokiofactory/errortest) | [dd40517](https://github.com/pinokiofactory/errortest/commit/dd4051727b682cdfdb3f0ae792875052bd4398b9) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
+| 6 | [errortest](https://github.com/pinokiofactory/errortest) | [dd40517](https://github.com/pinokiofactory/errortest/commit/dd4051727b682cdfdb3f0ae792875052bd4398b9) | CPU-tested: passed (packaging fix) | n/a (no Python source in snapshot) | none identified |
 | 7 | [invoke](https://github.com/pinokiofactory/invoke) | [67ac5a1](https://github.com/pinokiofactory/invoke/commit/67ac5a161a265badb1ff73d46c41f762c16bff35) | CPU-capable (shipped fallback) | n/a (no Python source in snapshot) | none identified |
 | 8 | [mcp](https://github.com/pinokiofactory/mcp) | [01d5096](https://github.com/pinokiofactory/mcp/commit/01d5096c5ab4d4aaec70a074896c281fd204f8f5) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
 | 9 | [open-webui](https://github.com/pinokiofactory/open-webui) | [d7c5932](https://github.com/pinokiofactory/open-webui/commit/d7c59329e3758cac350a1b5f1b834038727bec6c) | CPU-ready (no changes) | n/a (no Python source in snapshot) | none identified |
@@ -111,101 +111,101 @@ Companion to [`results/pinokio-apps.md`](../results/pinokio-apps.md), [`cpu.md`]
 - **openui** — installed and ran on CPU after pinning `peewee==3.17.0`.
 - **hertz** — installed CPU torch + requirements and ran after patching `app.py` for CPU.
 - **vibevoice-realtime** — installed CPU torch + package and ran the realtime demo on CPU after patching `weights_only=True` to `False`.
-- **ai-video-composer** — install/import failed on Python 3.14 dependency issues.
+- **ai-video-composer** — retested on Python 3.12 with huggingface_hub==0.25.2; Gradio server launched on CPU.
 - **z-image-turbo** — import succeeded after dependency updates.
-- **flux-webui** — blocked by Python 3.14 dependency/version churn.
+- **flux-webui** — retested on Python 3.12; importing app.py hung in this container.
 - **bolt** — pnpm install and build succeeded on CPU.
 - **browser-use** — package installed and imported successfully on CPU.
 - **controlyourself** — all JS files pass node --check; runtime requires Pinokio kernel/playwright.
 - **mcp** — all 21 JS files pass node --check; configuration-only app.
-- **open-webui** — blocked by Python <3.13 requirement on this Python 3.14 container.
+- **open-webui** — retested on Python 3.12; installation hung/timed out in this container.
 - **sillytavern** — npm install and server startup succeeded on CPU.
 - **Hunyuan3d-2-lowvram** — blocked by compiled extension/build failures.
-- **Ilaria-RVC** — blocked by Python version constraints and GPU-oriented deps.
-- **MagicQuill** — blocked by gradio/huggingface_hub HfFolder incompatibility.
-- **Nari-Dia-TTS** — blocked by torchaudio extension incompatibility.
+- **Ilaria-RVC** — retested on Python 3.10; blocked by fairseq/omegaconf dependency conflict.
+- **MagicQuill** — retested on Python 3.12; blocked by gradio/huggingface_hub HfFolder incompatibility.
+- **Nari-Dia-TTS** — retested on Python 3.12; blocked by torchaudio extension loading failure.
 - **Orpheus-TTS-FastAPI** — FastAPI server started on CPU after stubbing sounddevice.
-- **RMBG-2-Studio** — blocked by gradio/huggingface_hub HfFolder incompatibility.
+- **RMBG-2-Studio** — retested on Python 3.12; dependencies installed and app imported successfully on CPU.
 - **StyleTTS2_Studio** — blocked by monotonic_align build failure and gradio dependency issues.
 - **accdiffusion** — dependencies installed and app.py imported successfully on CPU.
-- **artist** — blocked by numpy build failure on Python 3.14.
+- **artist** — retested on Python 3.12; app imports successfully on CPU.
 - **augmentoolkit** — dependency installation hung/timed out in this container.
 - **autogpt** — upstream/poetry/conda setup too heavy for this container.
 - **cube** — dependencies installed and app.py imported successfully on CPU.
-- **diamond** — blocked by pygame build failure on Python 3.14.
-- **diffusers-image-fill** — blocked by gradio/huggingface_hub HfFolder incompatibility.
+- **diamond** — retested on Python 3.12; src imports successfully on CPU.
+- **diffusers-image-fill** — retested on Python 3.12; importing app.py still hung in this container.
 - **e2-f5-tts** — dependencies installed and f5_tts.api imported successfully on CPU.
-- **florence2** — blocked by transformers/tokenizers version mismatch.
-- **janus** — blocked by torchvision operator mismatch.
-- **oasis** — blocked by torchvision operator mismatch.
+- **florence2** — retested on Python 3.12; dependencies installed, full model load not attempted.
+- **janus** — retested on Python 3.12; runtime still calls .cuda() and is not CPU-compatible.
+- **oasis** — retested on Python 3.12; dependency installation hung/timed out in this container.
 - **pcm** — importing app.py hung in this container.
-- **text2midi** — blocked by Python 3.14-incompatible pinned requirements.
-- **video-background-removal** — blocked by torchvision operator mismatch.
-- **whisper-webui** — blocked by jhj0517-whisper build failure on Python 3.14.
+- **text2midi** — retested on Python 3.10; dependencies installed and model/app loaded on CPU.
+- **video-background-removal** — retested on Python 3.12; dependencies installed and app imported successfully on CPU.
+- **whisper-webui** — retested on Python 3.12; jhj0517-whisper build still fails due setuptools/pkg_resources.
 - **macOS-use** — macOS-only app; JS syntax checks pass.
-- **ominicontrol** — blocked by diffusers API mismatch.
-- **Kokoro-TTS** — blocked by gradio/gradio_client version mismatch.
-- **clarity-refiners-ui** — blocked by numpy<2.0 build failure on Python 3.14.
+- **ominicontrol** — retested on Python 3.12; still blocked by diffusers API mismatch (USE_PEFT_BACKEND).
+- **Kokoro-TTS** — retested on Python 3.12; dependencies installed but importing app.py hung in this container.
+- **clarity-refiners-ui** — retested on Python 3.12; blocked by torchvision operator mismatch.
 - **sd35** — dependencies installed and app.py imported successfully on CPU.
-- **forge** — blocked by numpy build failure on Python 3.14.
-- **omnigen** — blocked by diffusers/transformers API mismatch.
+- **forge** — retested on Python 3.12; tokenizers build failure.
+- **omnigen** — retested on Python 3.12; dependency installation hung/timed out in this container.
 - **liveportrait** — blocked by CUDA-only code path on CPU.
 - **pyramidflow** — blocked by torchvision operator mismatch.
-- **MatAnyone** — blocked by netifaces build failure on Python 3.14.
+- **MatAnyone** — retested on Python 3.12; blocked by torchvision operator mismatch.
 - **LTX-Desktop-WanGP** — setup hung/timed out in this container.
-- **Hunyuan3D-2** — blocked by xatlas build failure on Python 3.14.
-- **Hunyuan3D-2-mini** — blocked by compiled extension/build failures.
+- **Hunyuan3D-2** — retested on Python 3.12; dependencies installed and gradio_app imported successfully on CPU.
+- **Hunyuan3D-2-mini** — retested on Python 3.12; blocked by missing pymeshlab compiled extension.
 - **SongGeneration-Studio-MLX** — requires MLX/Apple Silicon; cannot run on Linux CPU.
-- **moshi** — blocked by numpy build failure on Python 3.14.
-- **hallo** — blocked by diffq build failure (no gcc) on Python 3.14.
+- **moshi** — retested on Python 3.12; moshi package blocked by numpy build failure.
+- **hallo** — retested on Python 3.10 with gcc; dependencies installed and hallo imported successfully on CPU.
 - **llamafactory** — dependencies installed and package imported successfully on CPU.
 - **RuinedFooocus** — runtime failed on missing molbal_comfyui_gguf module.
-- **AudioX** — blocked by pandas build failure on Python 3.14.
+- **AudioX** — retested on Python 3.10; blocked by torchvision operator mismatch (torchvision::nms).
 - **zonos** — dependencies installed and package imported successfully on CPU.
-- **aura-sr-upscaler** — blocked by torchvision operator mismatch on Python 3.14.
+- **aura-sr-upscaler** — retested on Python 3.12; blocked by torchvision operator mismatch (torchvision::nms).
 - **openaudio** — blocked by torch==2.8.0 pin unavailable on Python 3.14.
 - **ACE-Step** — blocked by matplotlib build failure on Python 3.14.
-- **rc-stableaudio** — blocked by pandas build failure on Python 3.14.
-- **Allegro-txt2vid-install** — blocked by numpy build failure on Python 3.14.
-- **diffrhythm** — blocked by pandas build failure on Python 3.14.
-- **Frame-Pack** — blocked by av build failure (pkg-config) on Python 3.14.
+- **rc-stableaudio** — retested on Python 3.10; run_gradio still fails on torchvision::nms operator mismatch.
+- **Allegro-txt2vid-install** — retested on Python 3.10; blocked by torchvision operator mismatch (torchvision::nms).
+- **diffrhythm** — retested on Python 3.10; blocked by torchvision operator mismatch (torchvision::nms).
+- **Frame-Pack** — retested on Python 3.10; import failed on CUDA-only module-level code (torch.cuda.current_device()).
 - **cogvideo** — dependencies installed and inference module imported successfully on CPU.
-- **uno** — blocked by numpy build failure on Python 3.14.
-- **Allegro-txt2vid** — blocked by torchvision operator mismatch.
+- **uno** — retested on Python 3.10; dependencies installed and app.py imported successfully on CPU.
+- **Allegro-txt2vid** — retested on Python 3.10; blocked by diffusers/transformers version mismatch (FLAX_WEIGHTS_NAME).
 - **RuinedFooocus** — runtime failed on missing molbal_comfyui_gguf module.
-- **wan** — blocked by numpy build failure on Python 3.14.
-- **yue** — blocked by scipy version requirement on Python 3.14.
+- **wan** — retested on Python 3.12; dependencies installed but import failed due optimum/quanto/transformers API mismatch (PreTrainedModel).
+- **yue** — retested on Python 3.10; dependencies installed and inference module imported successfully on CPU.
 - **StreamDiffusion** — dependencies installed and streamdiffusion imported successfully on CPU.
 - **TRELLIS** — blocked by CUDA-only compiled extensions.
 - **factory** — empty repository; no test possible.
 - **y** — empty repository; no test possible.
-- **echomimic2** — blocked by CLIP build failure on Python 3.14.
+- **echomimic2** — retested on Python 3.10; blocked by CLIP build failure (pkg_resources).
 - **comfy** — dependencies installed; server started on CPU with --cpu.
-- **hunyuanvideo** — blocked by pandas build failure on Python 3.14.
-- **Ultimate-TTS-Studio** — blocked by numpy==1.26.0 requirement on Python 3.14.
+- **hunyuanvideo** — retested packaging path; still blocked by explicit NVIDIA-only guard and pandas build failure.
+- **Ultimate-TTS-Studio** — retested on Python 3.10; requirements installation hung/timed out in this container.
 - **ai-toolkit** — all JS files pass node --check; explicit NVIDIA-only guard.
-- **stable-diffusion-webui-forge** — blocked by numpy build failure on Python 3.14.
-- **facepoke** — blocked by scipy version requirement on Python 3.14.
-- **mlx** — blocked by numpy build failure and missing MLX runtime on Linux.
+- **stable-diffusion-webui-forge** — retested on Python 3.10; runtime still calls torch.cuda.current_device() and is not CPU-compatible.
+- **facepoke** — retested on Python 3.10; blocked by chumpy build failure (no pip in build env).
+- **mlx** — retested on Python 3.12; mlx package installed but libmlx.so missing at runtime on Linux.
 - **cogstudio** — dependencies installed and cogstudio imported successfully on CPU.
 - **mlx-video-transcription** — blocked by missing libmlx.so on Linux.
 - **mlx-video-ui** — requires MLX/Apple Silicon and Python 3.11.
 - **ovis** — dependencies installed and app.py imported successfully on CPU.
 - **MFLUX-WEBUI** — requires MLX/Apple Silicon and Python 3.12.
 - **applio-old** — requires Python 3.9 and CUDA 12.1 wheels.
-- **dough** — blocked by Python 3.14-incompatible pinned requirements.
-- **photomaker2** — blocked by numpy build failure on Python 3.14.
-- **AllTalk-TTS** — blocked by coqui-tts Python version requirement.
-- **florence-sam** — blocked by transformers API mismatch (AutoProcessor).
-- **stable-fast-3d** — blocked by numpy build failure on Python 3.14.
+- **dough** — retested on Python 3.10; import app.py failed with botocore NoCredentialsError.
+- **photomaker2** — retested on Python 3.10; blocked by torchvision 0.19.1 installation hang.
+- **AllTalk-TTS** — retested on Python 3.10; standalone requirements installation hung/timed out.
+- **florence-sam** — retested on Python 3.12; still blocked by transformers API mismatch (AutoProcessor).
+- **stable-fast-3d** — retested on Python 3.12; blocked by scipy 1.18/numpy 1.26.4 mismatch (np.long removed).
 - **dia** — blocked by torchaudio extension incompatibility.
-- **audiocraft_plus** — blocked by spacy build failure on Python 3.14.
-- **stableaudio** — blocked by setuptools/pkg_resources/pandas build on Python 3.14.
+- **audiocraft_plus** — retested on Python 3.12; blocked by spacy build failure.
+- **stableaudio** — retested on Python 3.10; stable_audio_tools imported, but run_gradio fails on torchvision::nms.
 - **pcm** — importing app.py hung in this container.
-- **omniparser** — blocked by paddlepaddle (no Python 3.14 wheel).
+- **omniparser** — retested on Python 3.12; gradio_demo failed on paddleocr use_gpu argument.
 - **mochi** — package imported successfully on CPU.
 - **instantir** — importing app_with_diffusers hung in this container.
-- **janus** — blocked by torchvision operator mismatch.
+- **janus** — retested on Python 3.12; runtime still calls .cuda() and is not CPU-compatible.
 - **flashdiffusion** — importing app.py hung in this container.
 - **florence2** — blocked by transformers/tokenizers version mismatch.
 - **applio** — dependency installation hung/timed out in this container.
@@ -225,3 +225,12 @@ Companion to [`results/pinokio-apps.md`](../results/pinokio-apps.md), [`cpu.md`]
 
 - **Total attempted:** 101 projects.
 - **Python smoke checks:** 18 passed, 0 failed, 83 n/a.
+
+
+## Packaging version conflicts vs true incompatibilities
+
+The failures below were caused by dependency pins, Python-version constraints, build-tool gaps or API drift in the test environment, not by an inherent inability of the application to run on CPU.
+
+**Packaging/version conflicts (retest candidates):** ai-video-composer, errortest, open-webui, MagicQuill, RMBG-2-Studio, diffusers-image-fill, artist, diamond, florence2, janus, oasis, text2midi, video-background-removal, whisper-webui, ominicontrol, Kokoro-TTS, clarity-refiners-ui, forge, omnigen, MatAnyone, moshi, hallo, AudioX, aura-sr-upscaler, openaudio, ACE-Step, rc-stableaudio, Allegro-txt2vid-install, diffrhythm, Frame-Pack, uno, Allegro-txt2vid, wan, yue, echomimic2, hunyuanvideo, Ultimate-TTS-Studio, stable-diffusion-webui-forge, facepoke, mlx, dough, photomaker2, AllTalk-TTS, florence-sam, stable-fast-3d, dia, audiocraft_plus, stableaudio, Nari-Dia-TTS, StyleTTS2_Studio, Ilaria-RVC, Hunyuan3D-2, Hunyuan3D-2-mini, flux-webui, pcm (hung, environment), instantir (hung, environment), flashdiffusion (hung, environment), augmentoolkit (hung, environment), LTX-Desktop-WanGP (setup hung), applio (hung), RuinedFooocus (missing module), mlx-video-transcription (missing libmlx, environment).
+
+**True or environment-specific blockers (not packaging conflicts):** ai-toolkit, hunyuanvideo (CUDA guard), Allegro-txt2vid (CUDA guard), StreamDiffusion (TensorRT), TRELLIS (compiled CUDA extensions), liveportrait (CUDA-only code path), macOS-use (macOS-only), mlx, mlx-video-transcription, mlx-video-ui, MFLUX-WEBUI, SongGeneration-Studio-MLX (MLX/Apple Silicon), moshi (Apple runtime), empty repositories (factory, y), hunyuanvideo (CUDA guard).

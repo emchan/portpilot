@@ -30,14 +30,5 @@ Wheel indexes referenced: cpu, cu128, rocm6.1.
 
 ## CPU test run (2026-11-21)
 
-- blocked by pandas build failure on Python 3.14.
+- retested on Python 3.10; blocked by torchvision operator mismatch (torchvision::nms).
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #76 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** GPU-only attention: flash-attn/sageattention/triton-windows/xformers; CUDA-only fused kernels.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

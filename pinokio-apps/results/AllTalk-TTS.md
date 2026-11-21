@@ -31,14 +31,5 @@ Wheel indexes referenced: cpu, cu121, rocm6.0.
 
 ## CPU test run (2026-11-21)
 
-- blocked by coqui-tts Python version requirement (>=3.9,<3.13).
+- retested on Python 3.10; standalone requirements installation hung/timed out.
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #67 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; substitute GPU-only attention libs with SDPA math backend; remove GPU runtimes (onnxruntime-gpu/deepspeed/cudnn/tensorrt).
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** GPU-only attention: xformers; GPU runtime: deepspeed.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

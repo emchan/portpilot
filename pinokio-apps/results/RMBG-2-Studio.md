@@ -35,14 +35,5 @@ Wheel indexes referenced: cpu, cu124, cu128, rocm6.2.4.
 
 ## CPU test run (2026-11-21)
 
-- Install blocked by gradio 4.44 requiring HfFolder from huggingface_hub.
-- Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #17 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; rely on devicetorch (already present); substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** pass (1/1 files).
-- **Blockers:** GPU-only attention: xformers.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+- retested on Python 3.12; dependencies installed and app imported successfully on CPU.
+- Result: **CPU port imports successfully.**

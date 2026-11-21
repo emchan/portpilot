@@ -31,14 +31,5 @@ Wheel indexes referenced: cu121, cu124, cu128, rocm6.3.
 
 ## CPU test run (2026-11-21)
 
-- blocked by scipy version requirement (scipy==1.10.1) on Python 3.14.
-- Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #92 of 101 (by porting effort, easiest first).
-- **Status:** Needs launcher change.
-- **Changes applied / required:** add a CPU wheel branch / remove GPU-only wheel pins; disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** no CPU/AMD launcher branch; GPU-only attention: flash-attn/triton/triton-windows/xformers; CUDA-only fused kernels.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+- retested on Python 3.10; dependencies installed and inference module imported successfully on CPU.
+- Result: **CPU port imports successfully.**

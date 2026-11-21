@@ -32,14 +32,5 @@ Third-party Python imports detected in local source: allegro, bs4, decord, devic
 
 ## CPU test run (2026-11-21)
 
-- blocked by torchvision operator mismatch.
+- retested on Python 3.10; blocked by gradio/transformers version mismatch (FLAX_WEIGHTS_NAME).
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #89 of 101 (by porting effort, easiest first).
-- **Status:** Blocked.
-- **Changes applied / required:** rely on devicetorch (already present); replace direct torch.cuda calls with devicetorch or cpu fallback; disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** pass (15/15 files).
-- **Blockers:** hard CUDA/TensorRT blocker; GPU-only attention: xformers; direct torch.cuda calls; CUDA-only fused kernels.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

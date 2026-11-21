@@ -31,14 +31,5 @@ Wheel indexes referenced: cu128, rocm6.3.
 
 ## CPU test run (2026-11-21)
 
-- blocked by numpy build failure on Python 3.14.
+- retested on Python 3.10; blocked by torchvision operator mismatch (torchvision::nms).
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #82 of 101 (by porting effort, easiest first).
-- **Status:** Needs launcher change.
-- **Changes applied / required:** add a CPU wheel branch / remove GPU-only wheel pins; rely on devicetorch (already present); substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** no CPU/AMD launcher branch; GPU-only attention: triton-windows/xformers.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

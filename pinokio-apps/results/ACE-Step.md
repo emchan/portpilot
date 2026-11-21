@@ -32,12 +32,3 @@ Wheel indexes referenced: cu128.
 
 - blocked by matplotlib build failure on Python 3.14.
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #88 of 101 (by porting effort, easiest first).
-- **Status:** Needs launcher change.
-- **Changes applied / required:** add a CPU wheel branch / remove GPU-only wheel pins; disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** no CPU/AMD launcher branch; GPU-only attention: triton/triton-windows/xformers; CUDA-only fused kernels.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

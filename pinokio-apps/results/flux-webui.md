@@ -35,14 +35,5 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 
 ## CPU test run (2026-11-21)
 
-- Dependency installation hit multiple Python 3.14 incompatibilities (numpy, gradio_client.cli, etc.).
-- Result: **blocked by dependency/version churn in this environment.**
-
-## CPU port attempt
-
-- **Attempt order:** #81 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-GPU launcher route; rely on devicetorch (already present); disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend; tune oneDNN/MKL threads for FP16/BF16 GEMMs.
-- **Smoke check:** pass (1/1 files).
-- **Blockers:** GPU-only attention: flash-attn/sageattention/triton/triton-windows/xformers; CUDA-only fused kernels.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+- retested on Python 3.12 with full requirements; importing app.py hung in this container.
+- Result: **not runnable in this container.**

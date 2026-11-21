@@ -30,14 +30,5 @@ Wheel indexes referenced: cpu, cu121, rocm6.0.
 
 ## CPU test run (2026-11-21)
 
-- Blocked by Python version constraints (faiss-cpu<3.12, pyworld<3.11) and GPU-oriented deps on this Python 3.14 container.
+- retested on Python 3.10; blocked by fairseq/omegaconf dependency conflict (fairseq requires omegaconf<2.1).
 - Result: **not runnable in this container.**
-
-## CPU port attempt
-
-- **Attempt order:** #14 of 101 (by porting effort, easiest first).
-- **Status:** CPU-capable (shipped fallback).
-- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; rely on devicetorch (already present); substitute GPU-only attention libs with SDPA math backend.
-- **Smoke check:** n/a (no Python source in snapshot).
-- **Blockers:** GPU-only attention: xformers.
-- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
