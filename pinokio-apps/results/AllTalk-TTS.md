@@ -33,3 +33,48 @@ Wheel indexes referenced: cpu, cu121, rocm6.0.
 
 - retested on Python 3.10; standalone requirements installation hung/timed out.
 - Result: **not runnable in this container.**
+<!-- cross-analysis:start -->
+## Cross-analysis details
+
+- **CPU category (cpu.md):** CPU-capable with shipped fallback
+- **TPU suitability:** Difficult - significant port
+- **TPU work needed:** replace CUDA attention kernels with TPU-compatible attention/SDPA/XLA; DeepSpeed training/runtime path is CUDA-oriented; multiple CUDA-specific dependencies or large model/dtype constraints
+- **Effort ranking (effort.md):** #67 — Medium–high
+- **Effort blockers:** GPU-only attention: xformers; GPU runtime: deepspeed
+- **Precisions noted:** unspecified
+- **Models/flows noted:** —
+- **Flow graph:** [flows/AllTalk-TTS.md](../flows/AllTalk-TTS.md)
+
+### Snapshot verification (cloned analyzed commit)
+
+- **Snapshot source:** `https://codeload.github.com/pinokiofactory/AllTalk-TTS/tar.gz/<analyzed commit>` extracted to `/tmp/opencode/pinokio-snapshots/AllTalk-TTS`
+- **Files scanned:** 9 total (0 .py, 7 .js, 2 other)
+- **Key files present:** pinokio.js, install.js, torch.js, start.js
+- **TPU/CUDA-relevant signals:**
+  - `xformers`: 4 match(es) (e.g. torch.js:10, torch.js:10)
+  - `deepspeed`: 3 match(es) (e.g. install.js:69, install.js:69)
+  - `directml`: 1 match(es) (e.g. torch.js:20)
+
+### Evidence from analysis files
+
+| Source | Evidence |
+|---|---|
+| [kernels.md](../analysis/kernels.md) | No per-repo kernel table row matched; see kernels.md for global signals. |
+| [quantization.md](../analysis/quantization.md) | No per-repo quantization table row matched; see quantization.md. |
+| [fusion.md](../analysis/fusion.md) | No direct fusion table row matched; see fusion.md for global context. |
+| [models.md](../analysis/models.md) | No model pull/shape row matched in models.md. |
+| [cpu.md](../analysis/cpu.md) | CPU category: **CPU-capable with shipped fallback** |
+| [tpu.md](../analysis/tpu.md) | TPU suitability: **Difficult - significant port** — replace CUDA attention kernels with TPU-compatible attention/SDPA/XLA; DeepSpeed training/runtime path is CUDA-oriented; multiple CUDA-specific dependencies or large model/dtype constraints |
+
+### Related analysis
+
+- [CPU analysis](../analysis/cpu.md)
+- [TPU analysis](../analysis/tpu.md)
+- [Effort ranking](../analysis/effort.md)
+- [Kernel evidence](../analysis/kernels.md)
+- [Quantization evidence](../analysis/quantization.md)
+- [Fusion evidence](../analysis/fusion.md)
+- [Model pulls/shapes](../analysis/models.md)
+- [Flow graphs](../analysis/flows.md)
+- [App flow graph](../flows/AllTalk-TTS.md)
+<!-- cross-analysis:end -->

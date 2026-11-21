@@ -41,3 +41,47 @@ Wheel indexes referenced: cpu, cu121, rocm5.7.
 - **Smoke check:** n/a (no Python source in snapshot).
 - **Blockers:** GPU-only attention: xformers.
 - **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+<!-- cross-analysis:start -->
+## Cross-analysis details
+
+- **CPU category (cpu.md):** CPU-capable with shipped fallback
+- **TPU suitability:** Possible - moderate port
+- **TPU work needed:** replace CUDA attention kernels with TPU-compatible attention/SDPA/XLA; moderate device/kernel/runtime adaptation
+- **Effort ranking (effort.md):** #22 — Low
+- **Effort blockers:** GPU-only attention: xformers
+- **Precisions noted:** unspecified
+- **Models/flows noted:** —
+- **Flow graph:** [flows/augmentoolkit.md](../flows/augmentoolkit.md)
+
+### Snapshot verification (cloned analyzed commit)
+
+- **Snapshot source:** `https://codeload.github.com/pinokiofactory/augmentoolkit/tar.gz/<analyzed commit>` extracted to `/tmp/opencode/pinokio-snapshots/augmentoolkit`
+- **Files scanned:** 13 total (0 .py, 7 .js, 6 other)
+- **Key files present:** pinokio.js, install.js, torch.js, start.js, package.json
+- **TPU/CUDA-relevant signals:**
+  - `xformers`: 4 match(es) (e.g. torch.js:9, torch.js:9)
+  - `directml`: 1 match(es) (e.g. torch.js:19)
+
+### Evidence from analysis files
+
+| Source | Evidence |
+|---|---|
+| [kernels.md](../analysis/kernels.md) | No per-repo kernel table row matched; see kernels.md for global signals. |
+| [quantization.md](../analysis/quantization.md) | No per-repo quantization table row matched; see quantization.md. |
+| [fusion.md](../analysis/fusion.md) | No direct fusion table row matched; see fusion.md for global context. |
+| [models.md](../analysis/models.md) | No model pull/shape row matched in models.md. |
+| [cpu.md](../analysis/cpu.md) | CPU category: **CPU-capable with shipped fallback** |
+| [tpu.md](../analysis/tpu.md) | TPU suitability: **Possible - moderate port** — replace CUDA attention kernels with TPU-compatible attention/SDPA/XLA; moderate device/kernel/runtime adaptation |
+
+### Related analysis
+
+- [CPU analysis](../analysis/cpu.md)
+- [TPU analysis](../analysis/tpu.md)
+- [Effort ranking](../analysis/effort.md)
+- [Kernel evidence](../analysis/kernels.md)
+- [Quantization evidence](../analysis/quantization.md)
+- [Fusion evidence](../analysis/fusion.md)
+- [Model pulls/shapes](../analysis/models.md)
+- [Flow graphs](../analysis/flows.md)
+- [App flow graph](../flows/augmentoolkit.md)
+<!-- cross-analysis:end -->

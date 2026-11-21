@@ -1,6 +1,6 @@
 # CPU-only execution across the Pinokio Factory apps
 
-Companion to [`results/pinokio-apps.md`](../results/pinokio-apps.md), [`analysis/flows.md`](flows.md), [`analysis/kernels.md`](kernels.md), [`analysis/quantization.md`](quantization.md), [`analysis/fusion.md`](fusion.md) and [`../flows/`](../flows/). Every project row links to its analysed `main`-tip commit from 2026-11-20 and, where useful, to the reconstructed matmul flow.
+Companion to [`results/pinokio-apps.md`](../results/pinokio-apps.md), [`analysis/flows.md`](flows.md), [`analysis/kernels.md`](kernels.md), [`analysis/quantization.md`](quantization.md), [`analysis/fusion.md`](fusion.md), [`tpu.md`](tpu.md) and [`../flows/`](../flows/). Every project row links to its analysed `main`-tip commit from 2026-11-20 and, where useful, to the reconstructed matmul flow.
 
 CPU-only here means: install the PyTorch/ONNX stack from a CPU wheel index, run the app with no NVIDIA/AMD/Apple GPU, and execute every model operator on the host CPU. An app can be CPU-*capable* yet far too slow for its default checkpoint; those cases are called out explicitly.
 

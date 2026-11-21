@@ -41,3 +41,48 @@ Wheel indexes referenced: cpu, cu128, rocm6.0.
 - **Smoke check:** n/a (no Python source in snapshot).
 - **Blockers:** GPU-only attention: xformers; GPU runtime: onnxruntime-gpu.
 - **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+<!-- cross-analysis:start -->
+## Cross-analysis details
+
+- **CPU category (cpu.md):** CPU-capable with shipped fallback
+- **TPU suitability:** Difficult - significant port
+- **TPU work needed:** replace CUDA attention kernels with TPU-compatible attention/SDPA/XLA; replace onnxruntime-gpu with TPU-compatible runtime; multiple CUDA-specific dependencies or large model/dtype constraints
+- **Effort ranking (effort.md):** #49 — Medium
+- **Effort blockers:** GPU-only attention: xformers; GPU runtime: onnxruntime-gpu
+- **Precisions noted:** unspecified
+- **Models/flows noted:** [KwaiVGI/LivePortrait](https://huggingface.co/KwaiVGI/LivePortrait), [cleardusk/LivePortrait-Windows](https://huggingface.co/cleardusk/LivePortrait-Windows)
+- **Flow graph:** [flows/liveportrait.md](../flows/liveportrait.md)
+
+### Snapshot verification (cloned analyzed commit)
+
+- **Snapshot source:** `https://codeload.github.com/pinokiofactory/liveportrait/tar.gz/<analyzed commit>` extracted to `/tmp/opencode/pinokio-snapshots/liveportrait`
+- **Files scanned:** 13 total (0 .py, 8 .js, 5 other)
+- **Key files present:** pinokio.js, install.js, torch.js, start.js
+- **TPU/CUDA-relevant signals:**
+  - `xformers`: 5 match(es) (e.g. torch.js:10, torch.js:10)
+  - `onnxruntime_gpu`: 1 match(es) (e.g. install.js:26)
+  - `directml`: 1 match(es) (e.g. torch.js:21)
+
+### Evidence from analysis files
+
+| Source | Evidence |
+|---|---|
+| [kernels.md](../analysis/kernels.md) | No per-repo kernel table row matched; see kernels.md for global signals. |
+| [quantization.md](../analysis/quantization.md) | No per-repo quantization table row matched; see quantization.md. |
+| [fusion.md](../analysis/fusion.md) | No direct fusion table row matched; see fusion.md for global context. |
+| [models.md](../analysis/models.md) | No model pull/shape row matched in models.md. |
+| [cpu.md](../analysis/cpu.md) | CPU category: **CPU-capable with shipped fallback** |
+| [tpu.md](../analysis/tpu.md) | TPU suitability: **Difficult - significant port** — replace CUDA attention kernels with TPU-compatible attention/SDPA/XLA; replace onnxruntime-gpu with TPU-compatible runtime; multiple CUDA-specific dependencies or large model/dtype constraints |
+
+### Related analysis
+
+- [CPU analysis](../analysis/cpu.md)
+- [TPU analysis](../analysis/tpu.md)
+- [Effort ranking](../analysis/effort.md)
+- [Kernel evidence](../analysis/kernels.md)
+- [Quantization evidence](../analysis/quantization.md)
+- [Fusion evidence](../analysis/fusion.md)
+- [Model pulls/shapes](../analysis/models.md)
+- [Flow graphs](../analysis/flows.md)
+- [App flow graph](../flows/liveportrait.md)
+<!-- cross-analysis:end -->

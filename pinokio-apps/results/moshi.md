@@ -33,3 +33,47 @@ Wheel indexes referenced: cpu, cu121, nightly, rocm6.0.
 
 - retested on Python 3.12; moshi package blocked by numpy build failure.
 - Result: **not runnable in this container.**
+<!-- cross-analysis:start -->
+## Cross-analysis details
+
+- **CPU category (cpu.md):** Apple-silicon-only runtime
+- **TPU suitability:** Unsuitable - Apple MLX-only runtime
+- **TPU work needed:** MLX/Apple-silicon runtime; not a PyTorch/XLA TPU target
+- **Effort ranking (effort.md):** #72 — Medium–high
+- **Effort blockers:** Apple-silicon-only MLX runtime; GPU-only attention: xformers
+- **Precisions noted:** unspecified
+- **Models/flows noted:** —
+- **Flow graph:** [flows/moshi.md](../flows/moshi.md)
+
+### Snapshot verification (cloned analyzed commit)
+
+- **Snapshot source:** `https://codeload.github.com/pinokiofactory/moshi/tar.gz/<analyzed commit>` extracted to `/tmp/opencode/pinokio-snapshots/moshi`
+- **Files scanned:** 8 total (0 .py, 6 .js, 2 other)
+- **Key files present:** pinokio.js, install.js, torch.js, start.js
+- **TPU/CUDA-relevant signals:**
+  - `xformers`: 6 match(es) (e.g. torch.js:24, torch.js:24)
+  - `directml`: 1 match(es) (e.g. torch.js:35)
+
+### Evidence from analysis files
+
+| Source | Evidence |
+|---|---|
+| [kernels.md](../analysis/kernels.md) | No per-repo kernel table row matched; see kernels.md for global signals. |
+| [quantization.md](../analysis/quantization.md) | No per-repo quantization table row matched; see quantization.md. |
+| [fusion.md](../analysis/fusion.md) | No direct fusion table row matched; see fusion.md for global context. |
+| [models.md](../analysis/models.md) | No model pull/shape row matched in models.md. |
+| [cpu.md](../analysis/cpu.md) | CPU category: **Apple-silicon-only runtime** |
+| [tpu.md](../analysis/tpu.md) | TPU suitability: **Unsuitable - Apple MLX-only runtime** — MLX/Apple-silicon runtime; not a PyTorch/XLA TPU target |
+
+### Related analysis
+
+- [CPU analysis](../analysis/cpu.md)
+- [TPU analysis](../analysis/tpu.md)
+- [Effort ranking](../analysis/effort.md)
+- [Kernel evidence](../analysis/kernels.md)
+- [Quantization evidence](../analysis/quantization.md)
+- [Fusion evidence](../analysis/fusion.md)
+- [Model pulls/shapes](../analysis/models.md)
+- [Flow graphs](../analysis/flows.md)
+- [App flow graph](../flows/moshi.md)
+<!-- cross-analysis:end -->

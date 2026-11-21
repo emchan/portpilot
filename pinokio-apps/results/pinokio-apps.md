@@ -1,6 +1,6 @@
 # Pinokio Factory apps — portability study
 
-Generated from the 101 public repositories in the [pinokiofactory](https://github.com/pinokiofactory) GitHub organization. Each row combines the app's declared Python/system dependencies with the platform signals in its `pinokio.js`, `install.js`, `torch.js` and README. See [`README.md`](../README.md) (the reproduction prompt) for the study definition, and the per-app reports linked below for the raw evidence.
+Generated from the 101 public repositories in the [pinokiofactory](https://github.com/pinokiofactory) GitHub organization. Each row combines the app's declared Python/system dependencies with the platform signals in its `pinokio.js`, `install.js`, `torch.js` and README. See [`README.md`](../README.md) (the reproduction prompt) for the study definition, and the per-app reports linked below for the raw evidence. Companion analyses: [`analysis/cpu.md`](../analysis/cpu.md), [`analysis/tpu.md`](../analysis/tpu.md), [`analysis/effort.md`](../analysis/effort.md), [`analysis/kernels.md`](../analysis/kernels.md), [`analysis/quantization.md`](../analysis/quantization.md), [`analysis/fusion.md`](../analysis/fusion.md), [`analysis/models.md`](../analysis/models.md), [`analysis/flows.md`](../analysis/flows.md).
 
 ## Apps
 

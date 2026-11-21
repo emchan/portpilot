@@ -44,3 +44,50 @@ Wheel indexes referenced: cpu, cu124, rocm6.0.
 - **Smoke check:** n/a (no Python source in snapshot).
 - **Blockers:** hard CUDA/TensorRT blocker; GPU-only attention: flash-attn/triton/xformers; compiled CUDA extensions: ccimport/cumm-cu120/diff-gaussian-rasterization...; CUDA-only fused kernels.
 - **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+<!-- cross-analysis:start -->
+## Cross-analysis details
+
+- **CPU category (cpu.md):** Hard-blocked on CUDA
+- **TPU suitability:** Hard - major rewrite/replacement required
+- **TPU work needed:** CUDA/TensorRT/compiled CUDA extension dependency
+- **Effort ranking (effort.md):** #99 — Very high
+- **Effort blockers:** hard CUDA/TensorRT blocker in code; GPU-only attention: flash-attn/triton/xformers; compiled CUDA extensions: ccimport/cumm-cu120/diff-gaussian-rasterization/diffoctreerast...; 12 NVIDIA runtime libs; CUDA-only fused kernels need config change
+- **Precisions noted:** unspecified
+- **Models/flows noted:** —
+- **Flow graph:** [flows/TRELLIS.md](../flows/TRELLIS.md)
+
+### Snapshot verification (cloned analyzed commit)
+
+- **Snapshot source:** `https://codeload.github.com/pinokiofactory/TRELLIS/tar.gz/<analyzed commit>` extracted to `/tmp/opencode/pinokio-snapshots/TRELLIS`
+- **Files scanned:** 11 total (0 .py, 6 .js, 5 other)
+- **Key files present:** pinokio.js, install.js, torch.js, start.js, requirements.txt
+- **TPU/CUDA-relevant signals:**
+  - `xformers`: 8 match(es) (e.g. requirements.txt:7, torch.js:10)
+  - `flash_attn`: 20 match(es) (e.g. requirements.txt:34, requirements.txt:34)
+  - `triton`: 18 match(es) (e.g. requirements.txt:41, requirements.txt:41)
+  - `directml`: 1 match(es) (e.g. torch.js:20)
+
+### Evidence from analysis files
+
+| Source | Evidence |
+|---|---|
+| [kernels.md](../analysis/kernels.md) | `\| [TRELLIS](https://github.com/pinokiofactory/TRELLIS) \| [3d6dec1](https://github.com/pinokiofactory/TRELLIS/commit/3d6dec1fada102cba537ce7f6926061b0af7b962) \| requirements \| requirements-uv.txt, requirements.txt \| [requirements-uv.txt:90](https://github.com/pinokiofactory/TRELLIS/blob/3d6dec1fada102cba537ce7f6926061b0af7b962/requirements-uv.txt#L90) — #   triton \|` |
+| [kernels.md](../analysis/kernels.md) | `\| [TRELLIS](https://github.com/pinokiofactory/TRELLIS) \| [3d6dec1](https://github.com/pinokiofactory/TRELLIS/commit/3d6dec1fada102cba537ce7f6926061b0af7b962) \| requirements \| [requirements-uv.txt:72](https://github.com/pinokiofactory/TRELLIS/blob/3d6dec1fada102cba537ce7f6926061b0af7b962/requirements-uv.txt#L72) — # via flash-attn<br>[requirements-uv.txt:96](https://github.com/pinokiofactory/TRELLIS/blob/3d6dec1fada102cba537ce7f6926061b0af7b962/requirements-uv.txt#L96) — flash-attn @ https://github.com/bdashore3/flash-attention/releases/download/v2.7.1.post1/flash_attn-2.7.1.post1+cu124torch2.5.1cxx11abiFALSE-cp310-cp310-win_amd64... \|` |
+| [quantization.md](../analysis/quantization.md) | No per-repo quantization table row matched; see quantization.md. |
+| [fusion.md](../analysis/fusion.md) | `\| [TRELLIS](https://github.com/pinokiofactory/TRELLIS) \| [3d6dec1](https://github.com/pinokiofactory/TRELLIS/commit/3d6dec1fada102cba537ce7f6926061b0af7b962) \| dependency only \| [requirements-uv.txt:96](https://github.com/pinokiofactory/TRELLIS/blob/3d6dec1fada102cba537ce7f6926061b0af7b962/requirements-uv.txt#L96) — `flash-attn @ https://github.com/bdashore3/flash-attention/releases/download/v2.7.1.post1/flash_attn-2.7.1.post1+cu124torch2.5.1cxx11abiFALSE-cp310-cp3` \|` |
+| [models.md](../analysis/models.md) | No model pull/shape row matched in models.md. |
+| [cpu.md](../analysis/cpu.md) | CPU category: **Hard-blocked on CUDA** |
+| [tpu.md](../analysis/tpu.md) | TPU suitability: **Hard - major rewrite/replacement required** — CUDA/TensorRT/compiled CUDA extension dependency |
+
+### Related analysis
+
+- [CPU analysis](../analysis/cpu.md)
+- [TPU analysis](../analysis/tpu.md)
+- [Effort ranking](../analysis/effort.md)
+- [Kernel evidence](../analysis/kernels.md)
+- [Quantization evidence](../analysis/quantization.md)
+- [Fusion evidence](../analysis/fusion.md)
+- [Model pulls/shapes](../analysis/models.md)
+- [Flow graphs](../analysis/flows.md)
+- [App flow graph](../flows/TRELLIS.md)
+<!-- cross-analysis:end -->

@@ -1,6 +1,6 @@
 # Porting effort — all apps re-ranked, easiest first
 
-Companion to [`results/pinokio-apps.md`](../results/pinokio-apps.md), [`analysis/cpu.md`](cpu.md), [`analysis/kernels.md`](kernels.md), [`analysis/quantization.md`](quantization.md), [`analysis/models.md`](models.md), and [`analysis/flows.md`](flows.md). Snapshot: `main` tips recorded on 2026-11-20; each project links to its analysed commit.
+Companion to [`results/pinokio-apps.md`](../results/pinokio-apps.md), [`analysis/cpu.md`](cpu.md), [`analysis/tpu.md`](tpu.md), [`analysis/kernels.md`](kernels.md), [`analysis/quantization.md`](quantization.md), [`analysis/models.md`](models.md), and [`analysis/flows.md`](flows.md). Snapshot: `main` tips recorded on 2026-11-20; each project links to its analysed commit.
 
 ## Ranking method
 

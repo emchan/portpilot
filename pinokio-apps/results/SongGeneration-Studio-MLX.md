@@ -39,3 +39,46 @@ No package dependencies were declared in the repository. Installers that only ru
 - **Smoke check:** n/a (no Python source in snapshot).
 - **Blockers:** Apple-silicon-only MLX runtime.
 - **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+<!-- cross-analysis:start -->
+## Cross-analysis details
+
+- **CPU category (cpu.md):** Apple-silicon-only runtime
+- **TPU suitability:** Unsuitable - Apple MLX-only runtime
+- **TPU work needed:** MLX/Apple-silicon runtime; not a PyTorch/XLA TPU target
+- **Effort ranking (effort.md):** #62 — Medium–high
+- **Effort blockers:** Apple-silicon-only MLX runtime
+- **Precisions noted:** unspecified
+- **Models/flows noted:** [AITRADER/SongGeneration-Large-MLX](https://huggingface.co/AITRADER/SongGeneration-Large-MLX)
+- **Flow graph:** [flows/SongGeneration-Studio-MLX.md](../flows/SongGeneration-Studio-MLX.md)
+
+### Snapshot verification (cloned analyzed commit)
+
+- **Snapshot source:** `https://codeload.github.com/pinokiofactory/SongGeneration-Studio-MLX/tar.gz/<analyzed commit>` extracted to `/tmp/opencode/pinokio-snapshots/SongGeneration-Studio-MLX`
+- **Files scanned:** 10 total (0 .py, 5 .js, 5 other)
+- **Key files present:** pinokio.js, install.js, start.js
+- **TPU/CUDA-relevant signals:**
+  - `mlx`: 16 match(es) (e.g. pinokio.json:2, pinokio.json:3)
+
+### Evidence from analysis files
+
+| Source | Evidence |
+|---|---|
+| [kernels.md](../analysis/kernels.md) | No per-repo kernel table row matched; see kernels.md for global signals. |
+| [quantization.md](../analysis/quantization.md) | No per-repo quantization table row matched; see quantization.md. |
+| [fusion.md](../analysis/fusion.md) | No direct fusion table row matched; see fusion.md for global context. |
+| [models.md](../analysis/models.md) | No model pull/shape row matched in models.md. |
+| [cpu.md](../analysis/cpu.md) | CPU category: **Apple-silicon-only runtime** |
+| [tpu.md](../analysis/tpu.md) | TPU suitability: **Unsuitable - Apple MLX-only runtime** — MLX/Apple-silicon runtime; not a PyTorch/XLA TPU target |
+
+### Related analysis
+
+- [CPU analysis](../analysis/cpu.md)
+- [TPU analysis](../analysis/tpu.md)
+- [Effort ranking](../analysis/effort.md)
+- [Kernel evidence](../analysis/kernels.md)
+- [Quantization evidence](../analysis/quantization.md)
+- [Fusion evidence](../analysis/fusion.md)
+- [Model pulls/shapes](../analysis/models.md)
+- [Flow graphs](../analysis/flows.md)
+- [App flow graph](../flows/SongGeneration-Studio-MLX.md)
+<!-- cross-analysis:end -->

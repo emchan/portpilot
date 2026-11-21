@@ -45,3 +45,55 @@ Wheel indexes referenced: cu121, nightly.
 - **Smoke check:** pass (1/1 files).
 - **Blockers:** direct torch.cuda calls.
 - **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
+<!-- cross-analysis:start -->
+## Cross-analysis details
+
+- **CPU category (cpu.md):** CPU-capable with shipped fallback
+- **TPU suitability:** Possible - moderate port
+- **TPU work needed:** remove direct torch.cuda device assumptions; moderate device/kernel/runtime adaptation
+- **Effort ranking (effort.md):** #40 — Low
+- **Effort blockers:** direct `torch.cuda` calls
+- **Precisions noted:** BF16
+- **Models/flows noted:** —
+- **Flow graph:** [flows/hertz.md](../flows/hertz.md)
+
+### Snapshot verification (cloned analyzed commit)
+
+- **Snapshot source:** `https://codeload.github.com/pinokiofactory/hertz/tar.gz/<analyzed commit>` extracted to `/tmp/opencode/pinokio-snapshots/hertz`
+- **Files scanned:** 12 total (1 .py, 8 .js, 3 other)
+- **Key files present:** pinokio.js, install.js, torch.js, start.js
+- **TPU/CUDA-relevant signals:**
+  - `torch_cuda`: 1 match(es) (e.g. app.py:16)
+  - `xformers`: 2 match(es) (e.g. install.js:19, install.js:19)
+  - `directml`: 1 match(es) (e.g. torch.js:20)
+
+### Evidence from analysis files
+
+| Source | Evidence |
+|---|---|
+| [kernels.md](../analysis/kernels.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| env/config flag \| [start.js:9](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/start.js#L9) — //          USE_FLASH_ATTENTION: 1,<br>[server.js:9](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/server.js#L9) — USE_FLASH_ATTENTION: 1, \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [33](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L33) \| bfloat16 / BF16 \| dtype declaration \| generator = generator.eval().to(T.bfloat16).to(device) \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [73](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L73) \| — \| explicit cast \| audio_tensor = audio_tensor.float() \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [96](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L96) \| bfloat16 / BF16 \| mixed precision \| with T.autocast(device_type='cuda', dtype=T.bfloat16): \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [110](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L110) \| bfloat16 / BF16 \| mixed precision \| with T.autocast(device_type='cuda', dtype=T.bfloat16): \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [119](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L119) \| bfloat16 / BF16 \| explicit cast \| decoded_completion_ch1 = audio_tokenizer.data_from_latent(completed_audio[:, :, :32].bfloat16()) \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [120](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L120) \| bfloat16 / BF16 \| explicit cast \| decoded_completion_ch2 = audio_tokenizer.data_from_latent(completed_audio[:, :, 32:].bfloat16()) \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [123](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L123) \| bfloat16 / BF16 \| explicit cast \| decoded_completion = audio_tokenizer.data_from_latent(completed_audio.bfloat16()) \|` |
+| [quantization.md](../analysis/quantization.md) | `\| [hertz](https://github.com/pinokiofactory/hertz) \| [306ecc6](https://github.com/pinokiofactory/hertz/commit/306ecc634eea5a51a3d20729d44cc94f5650d45d) \| [131](https://github.com/pinokiofactory/hertz/blob/306ecc634eea5a51a3d20729d44cc94f5650d45d/app.py#L131) \| — \| explicit cast \| audio_tensor = audio_tensor.float() \|` |
+| [fusion.md](../analysis/fusion.md) | No direct fusion table row matched; see fusion.md for global context. |
+| [models.md](../analysis/models.md) | No model pull/shape row matched in models.md. |
+| [cpu.md](../analysis/cpu.md) | CPU category: **CPU-capable with shipped fallback** |
+| [tpu.md](../analysis/tpu.md) | TPU suitability: **Possible - moderate port** — remove direct torch.cuda device assumptions; moderate device/kernel/runtime adaptation |
+
+### Related analysis
+
+- [CPU analysis](../analysis/cpu.md)
+- [TPU analysis](../analysis/tpu.md)
+- [Effort ranking](../analysis/effort.md)
+- [Kernel evidence](../analysis/kernels.md)
+- [Quantization evidence](../analysis/quantization.md)
+- [Fusion evidence](../analysis/fusion.md)
+- [Model pulls/shapes](../analysis/models.md)
+- [Flow graphs](../analysis/flows.md)
+- [App flow graph](../flows/hertz.md)
+<!-- cross-analysis:end -->
