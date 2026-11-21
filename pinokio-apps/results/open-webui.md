@@ -24,3 +24,17 @@ itsdangerous, onnxruntime, open-webui
 - `torch.js` routes present: none.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Difficulty score: 0.0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- open-webui requires Python <3.13; cannot install on this Python 3.14 container.
+- Result: **static/environment-limited verification only.**
+
+## CPU port attempt
+
+- **Attempt order:** #9 of 101 (by porting effort, easiest first).
+- **Status:** CPU-ready (no changes).
+- **Changes applied / required:** no change required (no local GEMM workload); add a CPU wheel branch / remove GPU-only wheel pins.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** none identified.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

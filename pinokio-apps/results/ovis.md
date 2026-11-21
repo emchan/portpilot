@@ -31,3 +31,17 @@ Wheel indexes referenced: cpu, cu121, cu124, rocm6.0.
 - Requirements from: app/requirements.txt
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Difficulty score: 4.0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- dependencies installed and app.py imported successfully on CPU.
+- Result: **CPU port imports successfully.**
+
+## CPU port attempt
+
+- **Attempt order:** #60 of 101 (by porting effort, easiest first).
+- **Status:** CPU-capable (shipped fallback).
+- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; keep explicit device='cpu' branch; replace direct torch.cuda calls with devicetorch or cpu fallback; replace CUDA-only torch wheel with CPU wheel; +1.
+- **Smoke check:** pass (1/1 files).
+- **Blockers:** CUDA-only torch wheel; direct torch.cuda calls; MPS branch Apple-only.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

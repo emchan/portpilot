@@ -22,3 +22,17 @@ No package dependencies were declared in the repository. Installers that only ru
 ## Evidence and notes
 
 - Difficulty score: 0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- Empty repository; no install, dependency, or runtime test possible.
+- Result: **N/A (empty repository).**
+
+## CPU port attempt
+
+- **Attempt order:** #101 of 101 (by porting effort, easiest first).
+- **Status:** N/A (empty).
+- **Changes applied / required:** none — empty repository.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** empty repository.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

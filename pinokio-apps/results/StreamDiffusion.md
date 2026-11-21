@@ -31,3 +31,17 @@ Wheel indexes referenced: cu121.
 - Requirements from: demo/realtime-img2img/requirements.txt, demo/realtime-txt2img/requirements.txt, demo/vid2vid/requirements.txt, examples/screen/requirements.txt, examples/vid2vid/requirements.txt
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Difficulty score: 15.0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- dependencies installed and streamdiffusion imported successfully on CPU (TensorRT not required for import).
+- Result: **CPU port imports successfully.**
+
+## CPU port attempt
+
+- **Attempt order:** #98 of 101 (by porting effort, easiest first).
+- **Status:** Blocked.
+- **Changes applied / required:** use existing non-GPU launcher route; keep explicit device='cpu' branch; replace direct torch.cuda calls with devicetorch or cpu fallback; disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend; remove GPU runtimes (onnxruntime-gpu/deepspeed/cudnn/tensorrt); +2.
+- **Smoke check:** pass (36/36 files).
+- **Blockers:** hard CUDA/TensorRT blocker; GPU-only attention: triton/xformers; GPU runtime: tensorrt; CUDA-only torch wheel; +2.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

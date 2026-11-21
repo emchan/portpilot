@@ -30,3 +30,17 @@ Wheel indexes referenced: cpu, cu124, rocm6.0.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Optional (user-enabled only): xformers
 - Difficulty score: 57.5 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- blocked by CUDA-only compiled extensions (nvdiffrast, diff-gaussian-rasterization, kaolin).
+- Result: **not runnable in this container.**
+
+## CPU port attempt
+
+- **Attempt order:** #99 of 101 (by porting effort, easiest first).
+- **Status:** Blocked.
+- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-NVIDIA/non-AMD branch in torch.js; use existing non-GPU launcher route; disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend; remove/disable compiled CUDA extensions or provide CPU fallback.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** hard CUDA/TensorRT blocker; GPU-only attention: flash-attn/triton/xformers; compiled CUDA extensions: ccimport/cumm-cu120/diff-gaussian-rasterization...; CUDA-only fused kernels.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

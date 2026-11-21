@@ -24,3 +24,17 @@ mlx-video, ok, printmlx-video
 - `torch.js` routes present: none.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Difficulty score: 1.0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- requires MLX/Apple Silicon and Python 3.11; not runnable on this Linux CPU container.
+- Result: **not runnable in this container.**
+
+## CPU port attempt
+
+- **Attempt order:** #65 of 101 (by porting effort, easiest first).
+- **Status:** Blocked (Apple-only).
+- **Changes applied / required:** no change identified.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** Apple-silicon-only MLX runtime.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

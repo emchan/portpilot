@@ -28,3 +28,17 @@ Wheel indexes referenced: cu128.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Optional (user-enabled only): sageattention, triton, xformers
 - Difficulty score: 9.0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- Installed dependencies and cloned ComfyUI, but runtime failed on missing molbal_comfyui_gguf module.
+- Result: **not runnable in this container.**
+
+## CPU port attempt
+
+- **Attempt order:** #90 of 101 (by porting effort, easiest first).
+- **Status:** Needs launcher change.
+- **Changes applied / required:** add a CPU wheel branch / remove GPU-only wheel pins; disable fused GPU kernels (xformers/flash/sage) in config; substitute GPU-only attention libs with SDPA math backend.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** no CPU/AMD launcher branch; GPU-only attention: sageattention/triton-windows/xformers; CUDA-only fused kernels.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

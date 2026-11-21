@@ -33,3 +33,17 @@ Wheel indexes referenced: cu128, rocm6.3.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Optional (user-enabled only): xformers
 - Difficulty score: 4.5 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- dependencies installed and cogstudio imported successfully on CPU (with warnings).
+- Result: **CPU port imports successfully.**
+
+## CPU port attempt
+
+- **Attempt order:** #63 of 101 (by porting effort, easiest first).
+- **Status:** CPU-capable (shipped fallback).
+- **Changes applied / required:** use existing non-GPU launcher route; keep explicit device='cpu' branch; replace direct torch.cuda calls with devicetorch or cpu fallback; substitute GPU-only attention libs with SDPA math backend; tune oneDNN/MKL threads for FP16/BF16 GEMMs.
+- **Smoke check:** pass (1/1 files).
+- **Blockers:** GPU-only attention: xformers; direct torch.cuda calls.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

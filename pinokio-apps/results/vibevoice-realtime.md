@@ -26,3 +26,19 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - `torch.js` routes present: nvidia, amd, mac, cpu.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Difficulty score: 0.0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-20)
+
+- Downloaded upstream `microsoft/VibeVoice`; installed CPU torch and package.
+- First run failed on `torch.load(..., weights_only=True)` for cached voice presets.
+- Patched `demo/web/app.py` to `weights_only=False`; demo then started on `http://0.0.0.0:3000`.
+- Result: **CPU port works with a source patch.**
+
+## CPU port attempt
+
+- **Attempt order:** #12 of 101 (by porting effort, easiest first).
+- **Status:** CPU-capable (shipped fallback).
+- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-GPU launcher route; keep explicit device='cpu' branch; tune oneDNN/MKL threads for FP16/BF16 GEMMs.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** none identified.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

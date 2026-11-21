@@ -31,3 +31,17 @@ Wheel indexes referenced: cu128.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Optional (user-enabled only): triton, xformers
 - Difficulty score: 9.5 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- blocked by CLIP build failure (pkg_resources) on Python 3.14.
+- Result: **not runnable in this container.**
+
+## CPU port attempt
+
+- **Attempt order:** #93 of 101 (by porting effort, easiest first).
+- **Status:** Needs launcher change.
+- **Changes applied / required:** add a CPU wheel branch / remove GPU-only wheel pins; substitute GPU-only attention libs with SDPA math backend; remove GPU runtimes (onnxruntime-gpu/deepspeed/cudnn/tensorrt).
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** no CPU/AMD launcher branch; GPU-only attention: triton-windows/xformers; GPU runtime: onnxruntime-gpu.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

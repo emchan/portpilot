@@ -24,3 +24,17 @@ huggingface-hub, pydantic
 - `torch.js` routes present: none.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Difficulty score: 0.0 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- Downloaded upstream HF space; install failed on building pillow<11 for gradio 5.0.0 on Python 3.14. With newer gradio/moviepy, import hung.
+- Result: **not runnable in this container without dependency/version adjustments.**
+
+## CPU port attempt
+
+- **Attempt order:** #1 of 101 (by porting effort, easiest first).
+- **Status:** CPU-ready (no changes).
+- **Changes applied / required:** no change required (no local GEMM workload); add a CPU wheel branch / remove GPU-only wheel pins.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** none identified.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.

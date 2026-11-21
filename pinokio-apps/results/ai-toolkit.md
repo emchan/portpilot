@@ -27,3 +27,17 @@ Wheel indexes referenced: cpu, cu128.
 - `torch.js` routes present: nvidia, mac, cpu.
 - No CUDA kernels in the wrapper repository; compute is delegated to the upstream app or PyTorch wheels.
 - Difficulty score: 7.5 (heuristic; see the methodology in [pinokio-apps.md](pinokio-apps.md#method-and-limitations)).
+
+## CPU test run (2026-11-21)
+
+- all JS files pass node --check; explicit NVIDIA-only guard prevents CPU install.
+- Result: **not runnable in this container.**
+
+## CPU port attempt
+
+- **Attempt order:** #95 of 101 (by porting effort, easiest first).
+- **Status:** Blocked.
+- **Changes applied / required:** use existing CPU wheel branch in torch.js; use existing non-GPU launcher route; substitute GPU-only attention libs with SDPA math backend.
+- **Smoke check:** n/a (no Python source in snapshot).
+- **Blockers:** hard CUDA/TensorRT blocker; GPU-only attention: triton/triton-windows.
+- **Scope note:** static portability review of the Pinokio wrapper; no install or model download was executed.
