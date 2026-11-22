@@ -58,3 +58,6 @@ For every model and component, each role is listed with the number of matching w
 | [cocktailpeanut/sisao](https://huggingface.co/cocktailpeanut/sisao) | vae | Projection / FFN | 18 | 0–11 | `[1024, 1024]` ×18 | F32×18 | FP32×18 |
 | [cocktailpeanut/sisao](https://huggingface.co/cocktailpeanut/sisao) | vae | Other linear | 18 | 0–11 | `[3072, 1024]` ×18 | F32×18 | FP32×18 |
 | [cocktailpeanut/sisao](https://huggingface.co/cocktailpeanut/sisao) | x_embedder | Convolution (im2col matmul) | 1 | — | `[1024, 16, 2, 2]` ×1 | F32×1 | FP32×1 |
+
+## Snapdragon note
+- Deep scan: torch=10, xformers=3, directml=1. No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

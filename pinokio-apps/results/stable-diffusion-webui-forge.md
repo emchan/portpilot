@@ -87,3 +87,12 @@ Wheel indexes referenced: cu128.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/stable-diffusion-webui-forge.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 23 total (0 .py, 5 .js/.ts, 18 other)
+- **Snapdragon-relevant signals:** torch=2, safetensors=20
+- **Example evidence:**
+  - torch: `download-lcm-lora.json:5`
+  - safetensors: `download-flux1-dev-fp8.json:5`
+- **Snapdragon verdict:** No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

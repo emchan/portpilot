@@ -77,3 +77,6 @@ For every model and component, each role is listed with the number of matching w
 | [stabilityai/sd-turbo](https://huggingface.co/stabilityai/sd-turbo) | transformer | Convolution (im2col matmul) | 110 | 0–11 | `[512, 512, 3, 3]` ×30; `[1280, 1280, 3, 3]` ×20; `[128, 128, 3, 3]` ×10 | F32×110 | FP32×110 |
 | [stabilityai/sd-turbo](https://huggingface.co/stabilityai/sd-turbo) | transformer | 1×1 conv matmul | 28 | 0–11 | `[512, 512, 1, 1]` ×8; `[1280, 2560, 1, 1]` ×5; `[320, 640, 1, 1]` ×2 | F32×28 | FP32×28 |
 | [stabilityai/sd-turbo](https://huggingface.co/stabilityai/sd-turbo) | transformer | Other linear | 38 | 0–11 | `[1280, 1280]` ×12; `[320, 1280]` ×10; `[1280, 5120]` ×6 | F32×38 | FP32×38 |
+
+## Snapdragon note
+- Deep scan: cuda=97, torch=246, triton=4, xformers=59, tensorrt=101, mps=2, jax=3, safetensors=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

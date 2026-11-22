@@ -104,3 +104,19 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/comfy.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 54 total (0 .py, 16 .js/.ts, 38 other)
+- **Snapdragon-relevant signals:** torch=14, triton=3, xformers=3, sageattention=3, bitsandbytes=1, mps=3, directml=3, gguf=8, safetensors=92
+- **Example evidence:**
+  - torch: `download-lcm-lora.json:8`
+  - triton: `h.js:63`
+  - xformers: `install.js:46`
+  - sageattention: `h.js:62`
+  - bitsandbytes: `install.js:35`
+  - mps: `install.js:105`
+  - directml: `install.js:110`
+  - gguf: `download-flux-dev-gguf-q4-0.json:7`
+  - safetensors: `download-flux-dev-fp8.json:8`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

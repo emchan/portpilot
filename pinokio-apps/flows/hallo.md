@@ -74,3 +74,6 @@ For every model and component, each role is listed with the number of matching w
 | [fudan-generative-ai/hallo](https://huggingface.co/fudan-generative-ai/hallo) | vae | 1×1 conv matmul | 4 | 1–3 | `[256, 128, 1, 1]` ×1; `[256, 512, 1, 1]` ×1; `[512, 256, 1, 1]` ×1 | F32×4 | FP32×4 |
 | [fudan-generative-ai/hallo](https://huggingface.co/fudan-generative-ai/hallo) | wav2vec2 | Projection / FFN | 1 | — | `[768, 512]` ×1 | F32×1 | FP32×1 |
 | [fudan-generative-ai/hallo](https://huggingface.co/fudan-generative-ai/hallo) | wav2vec2 | Convolution (im2col matmul) | 7 | 0–6 | `[512, 512, 3]` ×4; `[512, 512, 2]` ×2; `[512, 1, 10]` ×1 | F32×7 | FP32×7 |
+
+## Snapdragon note
+- Deep scan: torch=13, xformers=4, bitsandbytes=2, directml=1. No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

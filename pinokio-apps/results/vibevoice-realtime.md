@@ -86,3 +86,14 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/vibevoice-realtime.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 10 total (0 .py, 6 .js/.ts, 4 other)
+- **Snapdragon-relevant signals:** cuda=2, torch=9, mps=1, directml=1
+- **Example evidence:**
+  - cuda: `README.md:39`
+  - torch: `install.js:18`
+  - mps: `start.js:10`
+  - directml: `torch.js:34`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

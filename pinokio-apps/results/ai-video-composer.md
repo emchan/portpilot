@@ -71,3 +71,11 @@ huggingface-hub, pydantic
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/ai-video-composer.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+
+- **Cloned snapshot:** yes (shallow clone of `main` tip); no Python source present in wrapper repo.
+- **Snapdragon CPU:** Ready (no local GEMM; normal ARM64 Python app).
+- **Snapdragon GPU (Adreno):** N/A (no local model to convert).
+- **Snapdragon NPU (Hexagon):** N/A (no local model to convert).
+- **Deep findings:** No `torch.cuda`, Triton, TensorRT, xformers, bitsandbytes, MLX or ONNX Runtime GPU signals in launcher files; compute is delegated upstream. No dependency/version blocker specific to ARM64 beyond standard Node/Python launcher tooling.

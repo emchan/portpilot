@@ -414,3 +414,6 @@ For every model and component, each role is listed with the number of matching w
 | [stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) | transformer | Convolution (im2col matmul) | 98 | 0–8 | `[512, 512, 3, 3]` ×30; `[1280, 1280, 3, 3]` ×11; `[128, 128, 3, 3]` ×10 | F16×98 | FP16×98 |
 | [stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) | transformer | 1×1 conv matmul | 25 | 0–8 | `[512, 512, 1, 1]` ×8; `[1280, 2560, 1, 1]` ×2; `[320, 640, 1, 1]` ×2 | F16×25 | FP16×25 |
 | [stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) | transformer | Other linear | 89 | 0–8 | `[1280, 5120]` ×60; `[640, 2560]` ×10; `[1280, 1280]` ×8 | F16×89 | FP16×89 |
+
+## Snapdragon note
+- Deep scan: torch=14, triton=3, xformers=3, sageattention=3, bitsandbytes=1, mps=3, directml=3, gguf=8, safetensors=92. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

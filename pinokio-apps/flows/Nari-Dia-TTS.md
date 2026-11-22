@@ -41,3 +41,6 @@ For every model and component, each role is listed with the number of matching w
 | File | Line | Evidence |
 | --- | --- | --- |
 | dia/layers.py | [dia/layers.py:392](https://github.com/pinokiofactory/Nari-Dia-TTS/blob/e5b630df297c7f47f6c518a00d6c3f44be4e25b5/dia/layers.py#L392) | attn_output = F.scaled_dot_product_attention( |
+
+## Snapdragon note
+- Deep scan: cuda=9, torch=204, triton=3, xformers=3, sageattention=5, mps=5, directml=1, jax=3. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

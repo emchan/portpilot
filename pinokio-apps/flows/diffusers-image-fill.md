@@ -15,3 +15,6 @@ No safetensors checkpoint was pulled by this launcher, so no weight-level matrix
 | controlnet_union.py | [controlnet_union.py:356](https://github.com/pinokiofactory/diffusers-image-fill/blob/a8b6497483d956df7ca1ffc882bf29af03476a26/controlnet_union.py#L356) | self.encoder_hid_proj = nn.Linear(encoder_hid_dim, cross_attention_dim) |
 | controlnet_union.py | [controlnet_union.py:460](https://github.com/pinokiofactory/diffusers-image-fill/blob/a8b6497483d956df7ca1ffc882bf29af03476a26/controlnet_union.py#L460) | nn.Linear(num_trans_channel, num_proj_channel) |
 | pipeline_fill_sd_xl.py | [pipeline_fill_sd_xl.py:40](https://github.com/pinokiofactory/diffusers-image-fill/blob/a8b6497483d956df7ca1ffc882bf29af03476a26/pipeline_fill_sd_xl.py#L40) | rgb_tensor = torch.einsum( |
+
+## Snapdragon note
+- Deep scan: torch=92, xformers=3, mps=5, directml=1, safetensors=1. Unsuitable (MLX/Apple-only runtime) for Snapdragon unless ported to CPU/ONNX.

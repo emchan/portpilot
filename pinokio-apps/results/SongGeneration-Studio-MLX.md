@@ -82,3 +82,11 @@ No package dependencies were declared in the repository. Installers that only ru
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/SongGeneration-Studio-MLX.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 10 total (0 .py, 5 .js/.ts, 5 other)
+- **Snapdragon-relevant signals:** mlx=17
+- **Example evidence:**
+  - mlx: `install.js:15`
+- **Snapdragon verdict:** Unsuitable (MLX/Apple-only runtime) for Snapdragon unless ported to CPU/ONNX.

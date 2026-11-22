@@ -72,3 +72,11 @@ No package dependencies were declared in the repository. Installers that only ru
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/errortest.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 4 total (0 .py, 3 .js/.ts, 1 other)
+- **Snapdragon-relevant signals:** triton=1
+- **Example evidence:**
+  - triton: `test.js:15`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

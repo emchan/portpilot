@@ -79,3 +79,15 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/MagicQuill.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 11 total (0 .py, 7 .js/.ts, 4 other)
+- **Snapdragon-relevant signals:** torch=13, xformers=3, bitsandbytes=1, directml=1, safetensors=5
+- **Example evidence:**
+  - torch: `install.js:46`
+  - xformers: `install.js:73`
+  - bitsandbytes: `torch.js:75`
+  - directml: `torch.js:20`
+  - safetensors: `models.yaml:2`
+- **Snapdragon verdict:** No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

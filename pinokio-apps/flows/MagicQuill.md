@@ -58,3 +58,6 @@ For every model and component, each role is listed with the number of matching w
 | [LiuZichen/MagicQuill-models](https://huggingface.co/LiuZichen/MagicQuill-models) | transformer | Convolution (im2col matmul) | 330 | 0–11 | `[512, 512, 3, 3]` ×90; `[1280, 1280, 3, 3]` ×60; `[128, 128, 3, 3]` ×30 | F16×330 | FP16×330 |
 | [LiuZichen/MagicQuill-models](https://huggingface.co/LiuZichen/MagicQuill-models) | transformer | 1×1 conv matmul | 180 | 0–11 | `[1280, 1280, 1, 1]` ×36; `[320, 320, 1, 1]` ×30; `[640, 640, 1, 1]` ×30 | F16×180 | FP16×180 |
 | [LiuZichen/MagicQuill-models](https://huggingface.co/LiuZichen/MagicQuill-models) | transformer | Other linear | 114 | 0–11 | `[1280, 1280]` ×36; `[320, 1280]` ×30; `[1280, 5120]` ×18 | F16×114 | FP16×114 |
+
+## Snapdragon note
+- Deep scan: torch=13, xformers=3, bitsandbytes=1, directml=1, safetensors=5. No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

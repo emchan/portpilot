@@ -44,3 +44,6 @@ For every model and component, each role is listed with the number of matching w
 | [stabilityai/sd-vae-ft-mse](https://huggingface.co/stabilityai/sd-vae-ft-mse) | vae | Projection / FFN | 2 | 0 | `[512, 512]` ×2 | F32×2 | FP32×2 |
 | [stabilityai/sd-vae-ft-mse](https://huggingface.co/stabilityai/sd-vae-ft-mse) | vae | Convolution (im2col matmul) | 58 | 0–3 | `[512, 512, 3, 3]` ×30; `[128, 128, 3, 3]` ×10; `[256, 256, 3, 3]` ×10 | F32×58 | FP32×58 |
 | [stabilityai/sd-vae-ft-mse](https://huggingface.co/stabilityai/sd-vae-ft-mse) | vae | 1×1 conv matmul | 6 | 1–3 | `[4, 4, 1, 1]` ×1; `[8, 8, 1, 1]` ×1; `[256, 128, 1, 1]` ×1 | F32×6 | FP32×6 |
+
+## Snapdragon note
+- Deep scan: torch=11, triton=2, xformers=3, onnxruntime-gpu=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

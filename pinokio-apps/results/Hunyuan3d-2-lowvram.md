@@ -87,3 +87,15 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/Hunyuan3d-2-lowvram.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 13 total (0 .py, 6 .js/.ts, 7 other)
+- **Snapdragon-relevant signals:** cuda=3, torch=11, xformers=3, mps=1, directml=1
+- **Example evidence:**
+  - cuda: `install.js:49`
+  - torch: `install.js:17`
+  - xformers: `install.js:21`
+  - mps: `start.js:5`
+  - directml: `torch.js:21`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

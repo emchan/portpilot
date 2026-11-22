@@ -67,3 +67,6 @@ For every model and component, each role is listed with the number of matching w
 | [Roblox/cube3d-v0.1](https://huggingface.co/Roblox/cube3d-v0.1) | vae | Projection / FFN | 37 | 0–23 | `[768, 768]` ×37 | F32×37 | FP32×37 |
 | [Roblox/cube3d-v0.1](https://huggingface.co/Roblox/cube3d-v0.1) | vae | Output head | 1 | — | `[1, 768]` ×1 | F32×1 | FP32×1 |
 | [Roblox/cube3d-v0.1](https://huggingface.co/Roblox/cube3d-v0.1) | vae | Other linear | 37 | 0–23 | `[1536, 768]` ×33; `[768, 768]` ×2; `[768, 774]` ×1 | F32×37 | FP32×37 |
+
+## Snapdragon note
+- Deep scan: torch=9, xformers=3, directml=1. No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

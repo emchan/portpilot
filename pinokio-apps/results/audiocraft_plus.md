@@ -80,3 +80,15 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/audiocraft_plus.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 12 total (0 .py, 7 .js/.ts, 5 other)
+- **Snapdragon-relevant signals:** cuda=1, torch=10, triton=1, xformers=4, directml=1
+- **Example evidence:**
+  - cuda: `requirements.txt:1`
+  - torch: `install.js:35`
+  - triton: `torch.js:12`
+  - xformers: `install.js:39`
+  - directml: `torch.js:25`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

@@ -72,3 +72,6 @@ For every model and component, each role is listed with the number of matching w
 | [refiners/juggernaut.reborn.sd1_5.unet](https://huggingface.co/refiners/juggernaut.reborn.sd1_5.unet) | upblocks | Convolution (im2col matmul) | 27 | — | `[1280, 1280, 3, 3]` ×8; `[1280, 2560, 3, 3]` ×5; `[640, 640, 3, 3]` ×4 | F16×27 | FP16×27 |
 | [refiners/juggernaut.reborn.sd1_5.unet](https://huggingface.co/refiners/juggernaut.reborn.sd1_5.unet) | upblocks | 1×1 conv matmul | 12 | — | `[1280, 2560, 1, 1]` ×5; `[320, 640, 1, 1]` ×2; `[320, 960, 1, 1]` ×1 | F16×12 | FP16×12 |
 | [refiners/juggernaut.reborn.sd1_5.unet](https://huggingface.co/refiners/juggernaut.reborn.sd1_5.unet) | vae | Projection / FFN | 2 | — | `[1280, 320]` ×1; `[1280, 1280]` ×1 | F16×2 | FP16×2 |
+
+## Snapdragon note
+- Deep scan: cuda=5, torch=59, xformers=2, mps=1, directml=1, safetensors=6. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

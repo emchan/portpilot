@@ -108,3 +108,6 @@ For every model and component, each role is listed with the number of matching w
 | [lllyasviel/FramePackI2V_HY](https://huggingface.co/lllyasviel/FramePackI2V_HY) | transformer | Projection / FFN | 80 | 0–39 | `[12288, 3072]` ×80 | BF16×80 | BF16×80 |
 | [lllyasviel/FramePackI2V_HY](https://huggingface.co/lllyasviel/FramePackI2V_HY) | transformer | Other linear | 60 | 0–19 | `[3072, 12288]` ×40; `[3072, 3072]` ×20 | BF16×60 | BF16×60 |
 | [lllyasviel/FramePackI2V_HY](https://huggingface.co/lllyasviel/FramePackI2V_HY) | x_embedder | Convolution (im2col matmul) | 1 | — | `[3072, 16, 1, 2, 2]` ×1 | BF16×1 | BF16×1 |
+
+## Snapdragon note
+- Deep scan: cuda=4, torch=59, triton=3, xformers=3, sageattention=3, directml=1, safetensors=2. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

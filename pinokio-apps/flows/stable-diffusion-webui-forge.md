@@ -187,3 +187,6 @@ For every model and component, each role is listed with the number of matching w
 | [stabilityai/stable-video-diffusion-img2vid-xt](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) | transformer | Other linear | 94 | 0–11 | `[1280, 1280]` ×25; `[320, 1280]` ×25; `[1280, 5120]` ×18 | F32×94 | FP32×94 |
 | [XLabs-AI/flux-lora-collection](https://huggingface.co/XLabs-AI/flux-lora-collection) | transformer | LoRA down (low-rank) | 304 | 0–18 | `[32, 3072] (rank 32)` ×228; `[256, 3072] (rank 256)` ×76 | BF16×304 | BF16×304 |
 | [XLabs-AI/flux-lora-collection](https://huggingface.co/XLabs-AI/flux-lora-collection) | transformer | LoRA up (low-rank) | 304 | 0–18 | `[3072, 32]` ×114; `[9216, 32]` ×114; `[3072, 256]` ×38 | BF16×304 | BF16×304 |
+
+## Snapdragon note
+- Deep scan: torch=2, safetensors=20. No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

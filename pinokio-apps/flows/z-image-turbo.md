@@ -47,3 +47,6 @@ For every model and component, each role is listed with the number of matching w
 | [Tongyi-MAI/Z-Image-Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) | transformer | MLP up | 36 | 0–35 | `[9728, 2560]` ×36 | BF16×36 | BF16×36 |
 | [Tongyi-MAI/Z-Image-Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) | transformer | MLP down | 36 | 0–35 | `[2560, 9728]` ×36 | BF16×36 | BF16×36 |
 | [Tongyi-MAI/Z-Image-Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) | transformer | Projection / FFN | 36 | 0–35 | `[2560, 4096]` ×36 | BF16×36 | BF16×36 |
+
+## Snapdragon note
+- Deep scan: cuda=4, torch=21, triton=2, xformers=2, flashattention=2, sageattention=2, mps=2, directml=1, safetensors=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

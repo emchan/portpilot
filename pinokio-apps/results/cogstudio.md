@@ -101,3 +101,14 @@ Wheel indexes referenced: cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/cogstudio.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 19 total (1 .py, 7 .js/.ts, 11 other)
+- **Snapdragon-relevant signals:** cuda=7, torch=27, xformers=3, mps=1
+- **Example evidence:**
+  - cuda: `cogstudio.py:41`
+  - torch: `cogstudio.py:18`
+  - xformers: `install.js:47`
+  - mps: `start.js:12`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

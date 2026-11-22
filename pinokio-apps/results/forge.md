@@ -73,3 +73,13 @@ No package dependencies were declared in the repository. Installers that only ru
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/forge.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 19 total (0 .py, 6 .js/.ts, 13 other)
+- **Snapdragon-relevant signals:** torch=2, mps=1, safetensors=12
+- **Example evidence:**
+  - torch: `download-lcm-lora.json:5`
+  - mps: `start.js:4`
+  - safetensors: `download-lcm-lora.json:5`
+- **Snapdragon verdict:** Unsuitable (MLX/Apple-only runtime) for Snapdragon unless ported to CPU/ONNX.

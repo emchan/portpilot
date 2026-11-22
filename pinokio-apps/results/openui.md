@@ -82,3 +82,9 @@ tiktoken
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/openui.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 10 total (0 .py, 7 .js/.ts, 3 other)
+ - **Snapdragon-relevant signals:** none detected by text scan
+- **Snapdragon verdict:** No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

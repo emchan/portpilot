@@ -81,3 +81,9 @@ gradio
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/macOS-use.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 12 total (1 .py, 5 .js/.ts, 6 other)
+ - **Snapdragon-relevant signals:** none detected by text scan
+- **Snapdragon verdict:** No CUDA signals; feasible on Snapdragon CPU via ARM64 wheels; GPU/NPU only via ONNX conversion.

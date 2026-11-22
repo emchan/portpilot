@@ -80,3 +80,9 @@ No package dependencies were declared in the repository. Installers that only ru
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/sillytavern.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 8 total (0 .py, 5 .js/.ts, 3 other)
+ - **Snapdragon-relevant signals:** none detected by text scan
+- **Snapdragon verdict:** No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

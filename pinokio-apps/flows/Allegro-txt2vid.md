@@ -63,3 +63,6 @@ For every model and component, each role is listed with the number of matching w
 | allegro/models/transformers/block.py | [allegro/models/transformers/block.py:829](https://github.com/pinokiofactory/Allegro-txt2vid/blob/f8327e3172834ee8d932d7284641a5e9a0065cbc/allegro/models/transformers/block.py#L829) | # hidden_states = F.scaled_dot_product_attention( |
 | allegro/models/transformers/block.py | [allegro/models/transformers/block.py:835](https://github.com/pinokiofactory/Allegro-txt2vid/blob/f8327e3172834ee8d932d7284641a5e9a0065cbc/allegro/models/transformers/block.py#L835) | hidden_states = F.scaled_dot_product_attention( |
 | allegro/models/transformers/block.py | [allegro/models/transformers/block.py:1187](https://github.com/pinokiofactory/Allegro-txt2vid/blob/f8327e3172834ee8d932d7284641a5e9a0065cbc/allegro/models/transformers/block.py#L1187) | self.linear = nn.Linear(embedding_dim, 6 * embedding_dim, bias=True) |
+
+## Snapdragon note
+- Deep scan: cuda=19, torch=297, xformers=42, mps=8. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

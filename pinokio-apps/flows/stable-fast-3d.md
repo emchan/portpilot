@@ -65,3 +65,6 @@ For every model and component, each role is listed with the number of matching w
 | [cocktailpeanut/sf3d](https://huggingface.co/cocktailpeanut/sf3d) | transformer | Convolution (im2col matmul) | 2 | — | `[768, 3, 32, 32]` ×1; `[1024, 3, 14, 14]` ×1 | F32×2 | FP32×2 |
 | [cocktailpeanut/sf3d](https://huggingface.co/cocktailpeanut/sf3d) | transformer | Other linear | 84 | 0–3 | `[1024, 1024]` ×72; `[1024, 4096]` ×12 | F32×84 | FP32×84 |
 | [cocktailpeanut/sf3d](https://huggingface.co/cocktailpeanut/sf3d) | vae | Other linear | 10 | 0–6 | `[64, 64]` ×4; `[64, 120]` ×3; `[3, 64]` ×2 | F32×10 | FP32×10 |
+
+## Snapdragon note
+- Deep scan: torch=10, xformers=3, directml=1. No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

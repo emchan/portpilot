@@ -52,3 +52,6 @@ For every model and component, each role is listed with the number of matching w
 | [microsoft/VibeVoice-Realtime-0.5B](https://huggingface.co/microsoft/VibeVoice-Realtime-0.5B) | transformer | Convolution (im2col matmul) | 34 | 0–6 | `[2048, 1, 7]` ×8; `[1024, 1, 7]` ×3; `[512, 1, 7]` ×3 | BF16×34 | BF16×34 |
 | [microsoft/VibeVoice-Realtime-0.5B](https://huggingface.co/microsoft/VibeVoice-Realtime-0.5B) | transformer | Other linear | 1 | — | `[2, 896]` ×1 | BF16×1 | BF16×1 |
 | [microsoft/VibeVoice-Realtime-0.5B](https://huggingface.co/microsoft/VibeVoice-Realtime-0.5B) | tts_eos_classifier | Projection / FFN | 2 | — | `[896, 896]` ×1; `[1, 896]` ×1 | BF16×2 | BF16×2 |
+
+## Snapdragon note
+- Deep scan: cuda=2, torch=9, mps=1, directml=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

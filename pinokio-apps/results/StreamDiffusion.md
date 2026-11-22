@@ -102,3 +102,18 @@ Wheel indexes referenced: cu121.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/StreamDiffusion.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 139 total (36 .py, 15 .js/.ts, 88 other)
+- **Snapdragon-relevant signals:** cuda=97, torch=246, triton=4, xformers=59, tensorrt=101, mps=2, jax=3, safetensors=1
+- **Example evidence:**
+  - cuda: `README-ja.md:99`
+  - torch: `README-ja.md:97`
+  - triton: `src/streamdiffusion/acceleration/sfast/__init__.py:14`
+  - xformers: `README-ja.md:104`
+  - tensorrt: `README-ja.md:123`
+  - mps: `demo/realtime-img2img/frontend/package-lock.json:2704`
+  - jax: `demo/realtime-txt2img/frontend/pnpm-lock.yaml:69`
+  - safetensors: `demo/realtime-txt2img/config.py:30`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

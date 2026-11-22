@@ -73,3 +73,11 @@ Wheel indexes referenced: cu118.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/dough.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 11 total (1 .py, 8 .js/.ts, 2 other)
+- **Snapdragon-relevant signals:** torch=1
+- **Example evidence:**
+  - torch: `install.js:29`
+- **Snapdragon verdict:** No CUDA signals; feasible on Snapdragon CPU via ARM64 wheels; GPU/NPU only via ONNX conversion.

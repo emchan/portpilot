@@ -90,3 +90,14 @@ Third-party Python imports detected in local source: allegro, bs4, decord, devic
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/Allegro-txt2vid.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 23 total (15 .py, 0 .js/.ts, 8 other)
+- **Snapdragon-relevant signals:** cuda=19, torch=297, xformers=42, mps=8
+- **Example evidence:**
+  - cuda: `gradio_app.py:567`
+  - torch: `gradio_app.py:18`
+  - xformers: `requirements.txt:7`
+  - mps: `gradio_app.py:917`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

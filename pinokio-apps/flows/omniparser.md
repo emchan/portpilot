@@ -52,3 +52,6 @@ For every model and component, each role is listed with the number of matching w
 | [microsoft/OmniParser](https://huggingface.co/microsoft/OmniParser) | vision_tower | Projection / FFN | 72 | 0–3 | `[512, 512]` ×18; `[2048, 512]` ×18; `[512, 2048]` ×18 | F32×72 | FP32×72 |
 | [microsoft/OmniParser](https://huggingface.co/microsoft/OmniParser) | vision_tower | Convolution (im2col matmul) | 52 | 0–3 | `[512, 1, 3, 3]` ×36; `[128, 1, 3, 3]` ×4; `[256, 1, 3, 3]` ×4 | F32×52 | FP32×52 |
 | [microsoft/OmniParser](https://huggingface.co/microsoft/OmniParser) | vision_tower | Other linear | 24 | 0–3 | `[1536, 512]` ×18; `[384, 128]` ×2; `[768, 256]` ×2 | F32×24 | FP32×24 |
+
+## Snapdragon note
+- Deep scan: torch=10, xformers=3, directml=1. No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

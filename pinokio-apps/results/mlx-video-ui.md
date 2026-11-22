@@ -82,3 +82,11 @@ mlx-video, ok, printmlx-video
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/mlx-video-ui.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 13 total (0 .py, 8 .js/.ts, 5 other)
+- **Snapdragon-relevant signals:** mlx=36
+- **Example evidence:**
+  - mlx: `backend.js:48`
+- **Snapdragon verdict:** Unsuitable (MLX/Apple-only runtime) for Snapdragon unless ported to CPU/ONNX.

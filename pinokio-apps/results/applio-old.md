@@ -82,3 +82,11 @@ Wheel indexes referenced: cu121.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/applio-old.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 6 total (0 .py, 5 .js/.ts, 1 other)
+- **Snapdragon-relevant signals:** torch=2
+- **Example evidence:**
+  - torch: `install.js:48`
+- **Snapdragon verdict:** No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

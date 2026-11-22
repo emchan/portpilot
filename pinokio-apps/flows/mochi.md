@@ -63,3 +63,6 @@ For every model and component, each role is listed with the number of matching w
 | [genmo/mochi-1-preview](https://huggingface.co/genmo/mochi-1-preview) | output_proj | Projection / FFN | 2 | — | `[3, 128]` ×1; `[24, 384]` ×1 | F32×2 | FP32×2 |
 | [genmo/mochi-1-preview](https://huggingface.co/genmo/mochi-1-preview) | t_embedder | Projection / FFN | 2 | 0–2 | `[3072, 256]` ×1; `[3072, 3072]` ×1 | F32×2 | FP32×2 |
 | [genmo/mochi-1-preview](https://huggingface.co/genmo/mochi-1-preview) | x_embedder | Convolution (im2col matmul) | 1 | — | `[3072, 12, 2, 2]` ×1 | F32×1 | FP32×1 |
+
+## Snapdragon note
+- Deep scan: cuda=1, torch=12, xformers=3, directml=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

@@ -156,3 +156,6 @@ For every model and component, each role is listed with the number of matching w
 | [stabilityai/stable-video-diffusion-img2vid-xt](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) | transformer | Convolution (im2col matmul) | 183 | 0–11 | `[512, 512, 3, 3]` ×30; `[1280, 1280, 3, 1, 1]` ×24; `[1280, 1280, 3, 3]` ×20 | F32×183 | FP32×183 |
 | [stabilityai/stable-video-diffusion-img2vid-xt](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) | transformer | 1×1 conv matmul | 26 | 0–11 | `[512, 512, 1, 1]` ×8; `[1280, 2560, 1, 1]` ×5; `[320, 640, 1, 1]` ×2 | F32×26 | FP32×26 |
 | [stabilityai/stable-video-diffusion-img2vid-xt](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) | transformer | Other linear | 94 | 0–11 | `[1280, 1280]` ×25; `[320, 1280]` ×25; `[1280, 5120]` ×18 | F32×94 | FP32×94 |
+
+## Snapdragon note
+- Deep scan: torch=2, mps=1, safetensors=12. Unsuitable (MLX/Apple-only runtime) for Snapdragon unless ported to CPU/ONNX.

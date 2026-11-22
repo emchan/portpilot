@@ -56,3 +56,6 @@ For every model and component, each role is listed with the number of matching w
 | [sayakpaul/FLUX.1-merged](https://huggingface.co/sayakpaul/FLUX.1-merged) | vae | MLP gate | 24 | 0–23 | `[10240, 4096]` ×24 | BF16×24 | BF16×24 |
 | [sayakpaul/FLUX.1-merged](https://huggingface.co/sayakpaul/FLUX.1-merged) | vae | MLP up | 24 | 0–23 | `[10240, 4096]` ×24 | BF16×24 | BF16×24 |
 | [sayakpaul/FLUX.1-merged](https://huggingface.co/sayakpaul/FLUX.1-merged) | vae | MLP down | 24 | 0–23 | `[4096, 10240]` ×24 | BF16×24 | BF16×24 |
+
+## Snapdragon note
+- Deep scan: cuda=2, torch=24, triton=3, xformers=4, flashattention=2, sageattention=2, mps=3, directml=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

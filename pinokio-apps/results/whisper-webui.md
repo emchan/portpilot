@@ -79,3 +79,13 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/whisper-webui.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 13 total (0 .py, 7 .js/.ts, 6 other)
+- **Snapdragon-relevant signals:** torch=9, xformers=2, directml=1
+- **Example evidence:**
+  - torch: `install.js:36`
+  - xformers: `torch.js:10`
+  - directml: `torch.js:22`
+- **Snapdragon verdict:** No Python GEMM in wrapper; Snapdragon CPU-ready as launcher/wrapper (no model port).

@@ -84,3 +84,12 @@ Wheel indexes referenced: cpu, cu128.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/ai-toolkit.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 11 total (0 .py, 7 .js/.ts, 4 other)
+- **Snapdragon-relevant signals:** torch=5, triton=2
+- **Example evidence:**
+  - torch: `install.js:37`
+  - triton: `torch.js:12`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

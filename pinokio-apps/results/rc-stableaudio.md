@@ -81,3 +81,17 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/rc-stableaudio.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 12 total (0 .py, 8 .js/.ts, 4 other)
+- **Snapdragon-relevant signals:** torch=13, triton=2, xformers=3, flashattention=2, sageattention=2, mps=1, directml=1
+- **Example evidence:**
+  - torch: `install.js:28`
+  - triton: `torch.js:12`
+  - xformers: `install.js:32`
+  - flashattention: `torch.js:14`
+  - sageattention: `torch.js:13`
+  - mps: `start.js:5`
+  - directml: `torch.js:44`
+- **Snapdragon verdict:** Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

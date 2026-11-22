@@ -84,3 +84,13 @@ Wheel indexes referenced: cpu, cu128, rocm6.3.
 - [Flow graphs](../analysis/flows.md)
 - [App flow graph](../flows/e2-f5-tts.md)
 <!-- cross-analysis:end -->
+
+## Snapdragon evaluation (deep clone)
+- **Clone/scan status:** cloned and scanned
+- **Files scanned:** 13 total (0 .py, 8 .js/.ts, 5 other)
+- **Snapdragon-relevant signals:** torch=17, xformers=3, mps=2
+- **Example evidence:**
+  - torch: `install.js:29`
+  - xformers: `install.js:41`
+  - mps: `start.js:12`
+- **Snapdragon verdict:** Unsuitable (MLX/Apple-only runtime) for Snapdragon unless ported to CPU/ONNX.

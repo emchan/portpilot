@@ -53,3 +53,6 @@ For every model and component, each role is listed with the number of matching w
 | [AIDC-AI/Ovis-Image-7B](https://huggingface.co/AIDC-AI/Ovis-Image-7B) | time_in | Other linear | 2 | — | `[3072, 256]` ×1; `[3072, 3072]` ×1 | F32×2 | FP32×2 |
 | [AIDC-AI/Ovis-Image-7B](https://huggingface.co/AIDC-AI/Ovis-Image-7B) | vae | Convolution (im2col matmul) | 58 | 0–3 | `[512, 512, 3, 3]` ×30; `[128, 128, 3, 3]` ×10; `[256, 256, 3, 3]` ×10 | F32×58 | FP32×58 |
 | [AIDC-AI/Ovis-Image-7B](https://huggingface.co/AIDC-AI/Ovis-Image-7B) | vae | 1×1 conv matmul | 12 | 0 | `[512, 512, 1, 1]` ×8; `[128, 256, 1, 1]` ×1; `[256, 512, 1, 1]` ×1 | F32×12 | FP32×12 |
+
+## Snapdragon note
+- Deep scan: cuda=15, torch=27, mps=16, safetensors=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.

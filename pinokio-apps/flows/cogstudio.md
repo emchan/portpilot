@@ -83,3 +83,6 @@ For every model and component, each role is listed with the number of matching w
 | [THUDM/CogVideoX-5b-I2V](https://huggingface.co/THUDM/CogVideoX-5b-I2V) | vae | MLP gate | 24 | 0–23 | `[10240, 4096]` ×24 | BF16×24 | BF16×24 |
 | [THUDM/CogVideoX-5b-I2V](https://huggingface.co/THUDM/CogVideoX-5b-I2V) | vae | MLP up | 24 | 0–23 | `[10240, 4096]` ×24 | BF16×24 | BF16×24 |
 | [THUDM/CogVideoX-5b-I2V](https://huggingface.co/THUDM/CogVideoX-5b-I2V) | vae | MLP down | 24 | 0–23 | `[4096, 10240]` ×24 | BF16×24 | BF16×24 |
+
+## Snapdragon note
+- Deep scan: cuda=7, torch=27, xformers=3, mps=1. Contains CUDA/Triton/TensorRT signals; Snapdragon path requires replacement or ONNX conversion.
